@@ -60,7 +60,7 @@
 	    
 3 Làm việc với tập tin trong Linux
 	1. Chữ hoa và chữ thường trong Linux
-	Tên file/folder trong Linux phân biệt chữ hoa và chữ thường, vì vậy trong một số tùy chon của các câu lệnh có tùy chọn dùng để phân biệt hoặc không hai cách nhìn nhận này.
+	Tên file/folder trong Linux phân biệt chữ hoa và chữ thường, vì vậy trong một số tùy chọn của các câu lệnh có tùy chọn dùng để phân biệt hoặc không hai cách nhìn nhận này.
 	2 Mọi thứ trong Linux đều là file
 	Hay như một cách nói chính xác hơn của chính cha đẻ Linux, Linus TOrvards :" Mọi thứ đều là những dòng chảy của byte", tất cả mọi dữ liệu, mọi thông tin trên Linux bao gồm cả processes, files, thư mục, sockets, pipes ... đều có thể được truy xuất thông qua các file lưu trữ qua hệ thống virtual system trong nhân Kernel, vì vậy công việc của ta là chỉ cần lệnh đọc "file" đó thôi, và hệ thống sẽ trả về kết quả như lệnh đọc thông thường.
 	3. Một số câu lệnh với file
@@ -147,9 +147,9 @@
 	Mọi thứ trong Linux đều là file, được tổ chức theo cấu trúc dạng cây. Trong đó, thư mục root là / , là thư mục lớn nhất bao trùm toàn bộ filesystem.
 	Trong / là các thư mục con với mục đích sử dụng và chức năng khác nhau riêng biệt:
 		Các thư mục chứa các thư viện:
-		/bin 	chứa tệp thực thi nhị phân (executable),  tất cả user được sử dụng lệnh ở đây
+		/bin 	chứa tệp thực thi nhị phân (executable),  tất cả user được sử dụng lệnh ở đây, được dùng khi boot hệ thống lần đầu hoặc không có phần ổ cứng nào 			được boot
 		/sbin	giống /bin, nhưng những tệp ở đây được sử dụng bởi admin hệ thống, dùng để duy trì hệ thống
-		/lib	chứa các file thư viện hỗ trợ các thư mục nằm ở /bin và /sbin; đuôi fie có thể là ld, lib hoặc so
+		/lib	chứa các file thư viện hỗ trợ các thư mục nằm ở /bin và /sbin; đuôi fie có thể là .ld, .lib hoặc .so
 		/opt	chứa các ứng dụng add-on từ các nhà cung cấp
 		
 		Các thư mục cấu hình:
@@ -173,18 +173,17 @@
 		/sys	lưu trữ và cho phép sửa dổi thiết bị kết nối với hệ thống.
 		
 		Các thư mục tài nguyên hệ thống
-		usr	/bin
-			/include
-			/lib
-			/local
-			/share
-			/src
+		usr	/bin		chứa hầu hết các file thực thi được người dùng sử dụng
+			/include	chứa các thư viện C
+			/lib		chứa các thư viện đối tượng, cũng bao gồm các file nhị phân được sử dụng gián tiếp qua các ứng dụng.
+			/local		chứa các tài nguyên cho người quản trị hệ thống khi cài đặt phần mềm cục bộ.
+			/share		chứa các dữ liệu static về cấu trúc độc lập. 
+			/src		chứa mã nguồn của Linux
 			
 		Các thư mục biến động:
-		/var
-		/var/log
-		/var/message
-		/var/mail
-		/var/lib
+		/var			chứa các thực thể, các biến để hệ thống thay đổi dữ liệu trong lúc sử dụng
+		/var/log		chứa các log files từ hệ thống và các chương trình khác. /var/log nên cần dược dọn dẹp theo thời hạn.	
+		/var/mail		chứa file mail của người dùng
+		/var/lib		chứa các biến dữ liệu động.
 		
 	
