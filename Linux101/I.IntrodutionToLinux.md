@@ -5,13 +5,12 @@
 
 
 ##1. Linux history
+
 ###1. Bối cảnh
  - Đến những năm 1990, hệ điều hành Unix rất phổ biến, nhưng các máy tính chứa hệ điều hành này còn đắt đối với người dùng cá nhân và có bản quyền nên không được sự thay đổi và chia sẻ mã nguồn cho người dùng.
  - Các cố gắng cho một hệ điều hành với mã nguồn mở được thực hiện vào năm 1983 với Hurd, nhưng thất bại do không được chấp nhận rộng rãi, hoặc năm 1987 với MINIX, tuy nhiên với kiến trúc 16 bit không phù hợp với máy tính cá nhân thời đó. 
- - 
 ###2. Tạo ra Linux
  - Với mong muốn tạo ra một hệ điều hành tự do, hoạt động được trên máy tính riêng của mình, bằng việc dựa theo MIMIX, Linus Torvald, khi ấy là một sinh viên 21 tuổi học ngành Khoa học máy tính, đã phát triển một hệ điều hành riêng, và chia sẻ nó qua một cộng đồng mạng, với mong muốn mọi người trải nghiệm và phản hồi. Từ đó Linux trở nên nổi tiếng và được sử dụng rộng rãi.
- - 
 ###3. Linux đến hiện tại
  - Đến nay, Linux đã được đông đảo cộng đồng đón nhận và sử dụng, được các lập trình viên cùng nhau nâng cấp, gỡ lỗi hệ điều hành miễn phí này, khiến nó hoạt động càng trở nên tối ưu và hiệu quả.
  - 
