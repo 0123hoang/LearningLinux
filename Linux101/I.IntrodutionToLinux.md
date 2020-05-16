@@ -16,7 +16,7 @@
  - 
 ## 2.Các bản phân phối : Redhat, Centos, Debian, Ubuntu, khác
 
-!{}(https://upload.wikimedia.org/wikipedia/commons/1/1b/Linux_Distribution_Timeline.svg)
+!{https://upload.wikimedia.org/wikipedia/commons/1/1b/Linux_Distribution_Timeline.svg}()
 Dựa theo liên kết miêu tả sơ bộ các phiên bản của Linux, ta thấy hệ điều hành mã nguồn mở này đã kích thích sự sáng tạo của cộng đồng lập trình viên máy tính, cho ra đời vô số phiên bản khác nhau. Một số thì đã không được phát triển nữa, một số thì vẫn còn phát triển mạnh mẽ và được tin dùng đến ngày nay. Ta sẽ đi tìm hiểu một số phiên bản phổ biến của Linux hiện nay
 ###1. Redhat
  - Phiên bản đầu tiên vào năm 1994 do công ty Redhat phát hành, được khuyến nghị sử dụng cho các doanh nghiệp lớn.
