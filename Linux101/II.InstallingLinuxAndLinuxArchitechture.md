@@ -2,11 +2,11 @@
 2. Kiến trúc trong Linux
 
 
-##1. Cài đặt một số bản phân phối Linux
-###1. Nguồn IOS
+## 1. Cài đặt một số bản phân phối Linux
+### 1. Nguồn IOS
  - Cách thông dụng nhất là tải về bản IOS chính thức trên trang chủ của phiên bản Linux đó. Một cách khác là download IOS qua Torrent. Một cách khác nữa là ta có thể boot trực tiếp qua mạng (ví dụ như Ubuntu Live installer).
 
-###2. Cài đặt Debian 8
+### 2. Cài đặt Debian 8
  - Sau khi có Debian IOS từ trang chủ của Debian, ta tạo một USB bootable device, sau đó khi khởi động lại máy tính, ta vào boot hệ thống để chọn boot Debian. Sau một số lựa chọn cơ bản như ngôn ngữ, domain, đặt mật khẩu, ta đến phần chọn phân vùng ổ cứng. Ta chọn Manual để cấu hình tùy chọn ổ cứng hoặc các tùy chọn còn lại để format toàn bộ dữ liệu ổ cứng để cài mới Debian.
 	Sử dụng và tạo phân vùng trống để cài đặt Debian trong đó:
 - 1. Primary, min khoảng 20GB, mount point \ , ghi dữ liệu theo kiểu Beginning, và đặt Bootable flag= on để boot vào ổ đĩa này.
@@ -15,10 +15,10 @@
 	
  - Bước quan trọng nhất đã xong, ta chấp nhận cấu hình rồi đợi cài đặt, ta có thể tùy chọn thêm một số phần mềm đi kèm sau đó. Tiếp theo ta chọn YES vào phần install GRUB boot loader để giúp có thể chọn được boot theo hệ điều hành nào khi máy được cài cùng lúc nhiều hệ điều hành. Sau đó thì ta đã có thể đăng nhập và vào giao diện chính của Debian.
 	
-###3. Cài đặt Ubuntu Server 2016
-	Sau khi ta đã tải về IOS và tạo USB bootable device, ta khởi động lại máy rồi vào phần boot của máy. Tại đây có bước cấu hình mạng và tài khoản của server. Ta đặt địa chỉ, net mask, host name, tạo user. Sau đó ta vào bước phân vùng ổ cứng tương tự như cài đặt Debian như đã nêu ở trên. Sau đó ta có thể cài đặt thêm một số service cho server Ubuntu này. Tiếp theo ta cũng cần cài đặt GRUB boot loader để có thể boot nhiều hệ điều hành. Khi hoàn thành tất cả, một màn hình dòng lệnh hiện ra để ta nhập tài khoản và mật khẩu, như vậy là ta đã cài đặt xong Ubuntu Server 2016. Để có thể sử dụng GUI, ta gõ câu lệnh sudo apt install ubuntu-gnome-desktop.
+### 3. Cài đặt Ubuntu Server 2016
+ - Sau khi ta đã tải về IOS và tạo USB bootable device, ta khởi động lại máy rồi vào phần boot của máy. Tại đây có bước cấu hình mạng và tài khoản của server. Ta đặt địa chỉ, net mask, host name, tạo user. Sau đó ta vào bước phân vùng ổ cứng tương tự như cài đặt Debian như đã nêu ở trên. Sau đó ta có thể cài đặt thêm một số service cho server Ubuntu này. Tiếp theo ta cũng cần cài đặt GRUB boot loader để có thể boot nhiều hệ điều hành. Khi hoàn thành tất cả, một màn hình dòng lệnh hiện ra để ta nhập tài khoản và mật khẩu, như vậy là ta đã cài đặt xong Ubuntu Server 2016. Để có thể sử dụng GUI, ta gõ câu lệnh sudo apt install ubuntu-gnome-desktop.
 	
-###4. Cài đặt CentOS 7.6 Minimal
+### 4. Cài đặt CentOS 7.6 Minimal
  - Sau khi ta đã tải về IOS và tạo USB bootable device, ta khởi động lại máy rồi vào phần boot của máy. Sau khi chọn ngôn ngữ, hiện ra một giao diện để cài đặt. Ở đây có một số cài đặt quan trọng là Installation Destination dùng để chỉ ổ cứng để cài hệ điều hành, ta có thể chọn automation hoặc tạo mới ổ cứng để chưa CentOS. Tới phần Software Selection, ta chọn Minimal Install để cài đặt bản Minimal cho CentOS, có thể thêm một số phần mầm kèm theo ở bên góc phải. Sau khi chọn Begin Installation, ta nhập mật khẩu cho quyền root, và bắt đầu cho việc cài đặt. Việc cài đặt sẽ hoàn tất sau khoảng 10-15p.
 	
 	
