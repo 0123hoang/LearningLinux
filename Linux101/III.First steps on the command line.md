@@ -1,7 +1,7 @@
-1.Manual
-2.Làm việc với thư mục
-3.Làm việc với tập tin
-4.Hệ thống phân cấp
+1.Manual\
+2.Làm việc với thư mục\
+3.Làm việc với tập tin\
+4.Hệ thống phân cấp\
 
 
 ## 1.Manual
