@@ -1,7 +1,7 @@
-1.Linux history<cr>
-2.Các bản phân phối : Redhat, Centos, Debian, Ubuntu, khác<cr>
-3. Vì sao lựa chọn Linux thay cho Windows<cr>
-4. Giấy phép và bản quyền sử dụng<cr>
+1.Linux history  
+2.Các bản phân phối : Redhat, Centos, Debian, Ubuntu, khác  
+3. Vì sao lựa chọn Linux thay cho Windows  
+4. Giấy phép và bản quyền sử dụng  
 
 
 ## 1. Linux history
