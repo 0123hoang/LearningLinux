@@ -22,8 +22,8 @@
  - Sau khi ta đã tải về IOS và tạo USB bootable device, ta khởi động lại máy rồi vào phần boot của máy. Sau khi chọn ngôn ngữ, hiện ra một giao diện để cài đặt. Ở đây có một số cài đặt quan trọng là Installation Destination dùng để chỉ ổ cứng để cài hệ điều hành, ta có thể chọn automation hoặc tạo mới ổ cứng để chưa CentOS. Tới phần Software Selection, ta chọn Minimal Install để cài đặt bản Minimal cho CentOS, có thể thêm một số phần mầm kèm theo ở bên góc phải. Sau khi chọn Begin Installation, ta nhập mật khẩu cho quyền root, và bắt đầu cho việc cài đặt. Việc cài đặt sẽ hoàn tất sau khoảng 10-15p.
 	
 	
-##2. Kiến trúc trong Linux
-###1. Kiến trúc Linux
+## 2. Kiến trúc trong Linux
+### 1. Kiến trúc Linux
  - Kiến trúc tổng quan của Linux gồm có 2 thành phần chính, User space và Kernel space.
   - User space là phần không gian của người dùng, chứa các ứng dụng, các chương trình người dùng thực thi, và cũng chứa cả thư viện GNU C.
   - Kernel space là phần không gian dành cho hệ điều hành, có chứa nhân kernel, giao diện lời gọi hệ thống (SCI) và mã nguồn phụ thuộc vào phần cứng.
@@ -48,10 +48,10 @@
 	
  - Shell là một ứng dụng giúp người dùng thao tác giữa người dùng với nhân Linux thông qua các dòng lệnh, script. Shell có rất nhiều phiên bản, trong đó có hai kiểu Shell chính là Bourne Shell (dòng nhắc lệnh  mặc định là $) và C Shell (dòng nhắc lệnh mặc định là %). Hiện nay Shell được đánh giá mạnh nhất là zsh, bên cạnh hững cái tên phổ biến khác như fish, bash, sh, ksh ,..
 	
-###3.Bash Shell là gì
+### 3.Bash Shell là gì
  - Là một chương trình họ Shell giúp tương tác với nhân máy tính hệ *Nix. Đây là một Shell có tuổi thọ lâu đời, và được sử dụng tích hợp trên nhiều hệ máy.
 		
-###4.Command là gì. Các tương tác với hệ thống
+### 4.Command là gì. Các tương tác với hệ thống
  - Command line (dòng lệnh) là một giao diện giúp giao tiếp với máy tính thông qua các dòng lệnh. Command line có thể gửi yêu cầu, gửi input tới và nhận output từ máy tính. Cần phân biệt giữa Command line với Shell, Shell là một ứng dụng giúp người dùng tương tác với OS, còn Command line dùng để tương tác giữa người dùng với máy tính, người dùng nhập input và yêu cầu máy tính thực hiện và máy tính trả về out put; người dùng dùng command line để chạy shell.
 
 	
