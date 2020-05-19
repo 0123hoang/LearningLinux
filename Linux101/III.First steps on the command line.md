@@ -85,11 +85,11 @@ File có 3 loại kiểu thời gian:
   - $rm -i [FILENAME]	 Hiện cảnh báo các file sẽ xóa
   - $rm -I [FILENAME]	 Hiện cảnh báo nếu xóa 3 file trở lên
 *Tùy chọn: Có thể xóa nhiều file theo mẫu biểu thức chính quy:*
-    - * : bất kì 0-n chữ cái, số nào 
-    - x? : 0-1 chữ cái hoặc số x
-    - x+ : 1-n chữ cái hoặc số x
-    - {x,y}: lần lượt xóa từng file khi thay x,y
-    - {x..y}: Xóa dải giá trị x -> y
+    - * bất kì 0-n chữ cái, số nào 
+    - x?  0-1 chữ cái hoặc số x
+    - x+  1-n chữ cái hoặc số x
+    - {x,y} lần lượt xóa từng file khi thay x,y
+    - {x..y} Xóa dải giá trị x -> y
 	
 #### Copy file
   - $cp [FILENAME1] [FILENAME2]	copy cùng thư mục
