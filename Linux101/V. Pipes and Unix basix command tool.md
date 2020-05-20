@@ -102,11 +102,65 @@ Trên cửa sổ dòngdòng lệnh có một số cách để điều hướng i
 *Nhận xét: Với những yêu cầu cơ bản, có thể dùng $comm để thay cho $diff* 
 ### 2. Sử dụng regex với các filter
 - Regex hay regular expression (biểu thức chính quy) là một tập hợp các quy tắc giúp biểu diễn các chuỗi có chung một quy tắc. Như đã đề cập một phần ở III., các biểu thức chính quy sẽ được liệt kê đầy đủ ở đây
-  - /^[STRING]$/	Một chuỗi cơ bản, trong đó toàn bộ dãy được bao đóng ở cặp //.
-        - ^	Đánh dấu điểm bắt đầu của chuỗi
-        - $	Đánh dấu điểm cuối cùng của chuỗi
+  - Các kí tự thay thế
+    - \d	Một số bất kì
+    - \D	Một kí tự không phải số bất kì
+    - \w	Một kí tự bất kì
+    - \s	Một kí tự khoảng trắng
+    - \b	kí tự số và chữ và thêm . _
+  - /^[STRING]$/g	Một chuỗi cơ bản, trong đó toàn bộ dãy được bao đóng ở cặp //, với g là đánh dấu tìm kiếm toàn bộ văn abrn.
+    - ^	Đánh dấu điểm bắt đầu của chuỗi
+    - $	Đánh dấu điểm cuối cùng của chuỗi
   - Với [STRING], ta có các mẫu chung:
+    - [abc], [a-c,g-y]	Khớp với 1 trong số đó
+    - a|b	Khớp 1 trong 2
+    - .	Khớp với bất kì kí tự nào
+    - ^	Ngoại trừ với các kí tự khớp với mẫu
+    - ()	Trong dấu ngoặc chính là một mẫu
+  - Lặp mẫu
+    - *	Xuất hiện 0-n lần mẫu trước nó
+    - +	Xuất hiện 1-n lần mẫu trước nó
+    - ?	Xuất hiện 0-1 lần mẫu trước nó
+    - {X}	Xuất hiện chính xác X lần mẫu trước nó
+    - {X,Y}	Xuất hiện X-Y lần 
+    - {X,}	Xuất hiện X-n lần
+    - {,X}	Xuất hiện 0-X lần
+    - *?	Xuất hiện khớp nhỏ nhất
   
 ## 3. Unix command tool
 ### 1. Command: find, locate, hostnameclt, timedateclt, sleep, tar
-
+ - $find dùng để tìm kiếm file.
+  -$find [STRING] [OPTIONS]	Tìm kiếm tất cả file và folder có trong folder đấy
+    - -type d	Tìm kiếm tất cả folders con
+    - -type f	Tìm kiếm tất cả files có trong thư mục đó
+    - -name [STRING]	Tìm kiếm một file cụ thể
+    - -iname [STRING]	TÌm kiếm bỏ qua chữ hoa thường
+    - -cmin n	Tìm kiếm file đã thay đổi n phút trước
+    - -ctime n Tìm kiếm file đã thay đổi n ngày trước
+    - Tương tự với amin, atime, mmin, mtime với a là accessed time, m là modified time
+    - *Số n có thể thay khoảng tìm kiếm -n hoặc +n*
+    - -size n	Tìm kiếm theo dung lượng(100, -250M, +3G)
+    - -perm n	Tìm kiếm theo quyền(777,762...)
+    - -exec chmod n {} +	Thay đổi quyền của file hoăc folder đó
+    - -maxdepth n	Tìm kiếm đệ quy tối đa n lớp
+ - $locate [OPTION] [FILENAME]	Tìm kiếm 1 file
+  - $locate -i [FILENAME]	Cú pháp cơ bản
+*$locate có ưu điểm so với find là tìm kiếm dựa theo database nên rất nhanh chóng, so với find là tìm kiếm thời gian thực. Tuy vậy locate cần phải được cập nhật database thường xuyên với câu lệnh $sudo updatedb*
+ - $hostnamectl [OPTION] [COMMAND]	Dùng đề thay đổi hoặc xem tên người dùng
+  - $hostnamectl status	Xem cài đặt người dùng cơ bản
+  - $hostnamectl set-hostname [NAME] đổi tên người dùng
+    - set-icon-name, set-location	Đổi thuộc tính tương ứng
+ - $timedatectl [OPTION] [COMMAND]	Dùng để thay đổi hoặc xem thời gian
+  - $timedatectl status	Câu lệnh cơ bản
+  - $timedatectl set-timezone [ZONE], set-ntp [BOOL], set-time [TIME]	Đổi thuộc tính tương ứng
+ - $sleep	Làm trễ một khoảng thời gian
+  - $sleep [NUMBER][SUFFIX]	Trễ môt khoảng [NUMBER] giây (mặc định). Với [SUFFIX] có thể là s,m,h,d tương ứng
+ - $tar [OPTIONS] [FILENAME]	Dùng để nén và giải nén file
+  - $tar -cvf [FILE_NAME.tar] [FILES]	Tạo nhiều file thành 1 file mới có đuôi tar
+    - -cvzf [FILE_NAME.tar.gz] [FILES]	Tạo và nén nhiều file thành đuôi .gz
+    - -cvjf để đổi đuôi .gz thành đuôi bz
+  - $tar -xvf [FILE_NAME.tar]	Bung tập tin lưu trữ
+    - -xvzf [FILE_NAME.tar.gz]	Vừa giải nén vừa bung tập tin
+    - -xvjf với đuôi .bz
+  - [FILENAME] có thể là một tập tin, một đường dẫn.
+    - --exclude=[FILENAME/FOLDER] dùng để loại trừ những file/folder không muốn nén.
