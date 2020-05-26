@@ -23,6 +23,7 @@ Trên hệ thống Linux có 3 loại tài khoản người dùng chính: admini
   - -H	Hiện user với các dòng thông tin tương ứng.
  - $w [OPTIONS]	Hiện thông tin người dùng đang đăng nhập vào và đang làm gì.
   - -i	Hiện ip thay vì tên của người dùng (nếu có thể)
+*https://bugs.launchpad.net/lightdm/+bug/871070 $who và $w có thể không được hoạt động đúng đắn, vậy nên muốn danh sách toàn bộ người dùng, ta có thể truy cập trực tiếp vào /etc/passwd.*
  - $id [OPTION] [USER]	Hiện thông tin của người dùng hoặc nhóm người dùng.
   - -u	Chỉ in ra userID
   - -g	Chỉ in ra các groupID của người dùng hiện thời
@@ -52,7 +53,7 @@ Trên hệ thống Linux có 3 loại tài khoản người dùng chính: admini
 #### Đặc tả riêng cho người dùng
 Dây là nơi mà lệnh $who sẽ sử dụng. Cấu trúc của nó như sau
 - <user list> <host list> = <operator list> <tag list> <command list>
-  - User list	là một nhóm người hoặc 1 bí danh
+  - User list	là một nhóm người hoặc 1 bí danhkhác
   - Host list	là một nhóm host hoặc bí danh host
   - Operation list	là một nhóm người, bí danh được cấp quyền như Runas_Alias
   - Command list	là một nhóm hay bí danh các câu lệnh
@@ -78,38 +79,145 @@ Câu trúc file gồm có 7 trường chính
 - Tài khoản root là tên người dùng hoặc tài khoản mà theo mặc định có quyền truy cập vào tất cả các lệnh và file trên Linux hoặc hệ điều hành giống Unix khác. Root cũng được gọi là tài khoản root, người dùng root và siêu người dùng. Tài khoản root là đặc quyền lớn nhất trên hệ thống và có quyền lực tuyệt đối đối với nó (tức là truy cập đầy đủ vào tất cả các file và lệnh). Một trong số các quyền hạn của root là khả năng sửa đổi hệ thống theo bất kỳ cách nào bạn muốn, cũng như cấp và thu hồi quyền truy cập (nghĩa là khả năng đọc, sửa đổi và thực thi các file và thư mục cụ thể) cho những user khác, kể cả mặc định dành riêng cho root.
  - Đăng nhập vào tài khoản root bằng lệnh $sudo su -
 ### 4. useradd và file cấu hình /etc/default/useradd
- - $useradd dùng để thêm một người dùng mới
-   - g	[UID]	Gán UID group 
-   - u [UID]	Tạo UID 
-   - U	Tạo một user group mới gán cho user mới có ID trùng nhau
-   - G [GROUP_NAME]	Gán tên group
-   - m	Tạo home directory mới
-   - d [DIR]	Gán thư mục Home cho tài khoản
-   - e [DATE]	Tạo ngày hết hạn cho tài khoản đấy
-   - s [DIR]	Gán thư mục shell cho tài khoản  
+#### useradd 
+Lệnh này dùng để thêm một người dùng mới
+    - -g	[UID]	Gán UID group 
+    - -u [UID]	Tạo UID 
+    - -U	Tạo một user group mới gán cho user mới có ID trùng nhau
+    - -G [GROUP_NAME]	Gán tên group
+    - -m	Tạo home directory mới
+    - -d [DIR]	Gán thư mục Home cho tài khoản
+    - -e [DATE]	Tạo ngày hết hạn cho tài khoản đấy
+    - -s [DIR]	Gán thư mục shell cho tài khoản  
 *Còn đối với trường thông tin còn lại - Password - sẽ được gán sau bởi lệnh $passwd*
 ### 5. userdel
-Lệnh này dùng để xóa file và thông tin đến người dùng
+Lệnh này dùng để xóa file và thông tin đến người dùng (tài khoản, mật khẩu)
  - $userdel [OPTION] [USER]
- 	-r	Xóa luôn cả home directory và mail spool
- 	-f	Xóa luôn cả files không được sở hữu bởi người dùng này
+    - -r	Xóa luôn cả home directory và mail spool
+    - -f	Xóa luôn cả files không được sở hữu bởi người dùng này
 ### 6. usermod
-### 7. Thư mục /ec/skel
+Lệnh này dùng để sửa đổi thông tin về tài khoản người dùng
+ - $usermod [OPTIONS] [USER]
+    - -d [HOME_DIR]	Tạo mới thư mục home cho người dùng, nếu dùng thêm -m, sẽ di chuyển toàn bộ file từ thư mục cũ sang thư mục mới.
+    - -e [EXPIRE_DATE]	Tạo ngày tài khoản hết hạn (bị khóa)
+    - -G GROUP1,GROUP2,...	Gán group cho tài khoản, nếu group hiện thời không được liệt kê, nó sẽ bị xóa khỏi group đó, cần phải thêm -a để thực hiện lệnh append.
+    - -l [NEW_USER]	Đổi tên user, đồng thời địa chỉ thư mục home và mail cũng được đổi tương ứng
+    - -L	Khóa mật khẩu
+    - -U	Mở khóa mật khẩu
+    - -s [SHELL]	Chọn Shell cho tài khoản đó, nếu để trống thì sẽ là shell mặc định
+*Ngoài ra còn có các câu lệnh với chức năng tương tự như adduser, deluser, các câu lệnh thực thi với group như addgroup, groupadd, groupmod với một số chức năng tương đương cơ bản*
+*Nếu muốn người dùng cụ thể thoát phiên sử dụng ngay lập tức, thực hiện câu lệnh $pkill -KILL -u [USER]*
+### 7. Thư mục /etc/skel
+Đây là thư mục mà khi người dùng mới được tạo ra (useradd), thư mục này sẽ được copy vào thư mục gốc của tài khoản đó.  
+Muốn thay đổi cấu hình mặc định cho useradd, ta sửa file /etc/default/useradd.
 ### 8. User Login Shell : /bin/bash và  /usr/sbin/nologin
+#### /bin/bash
+bash là một shell phổ biến. /bin/bash là đường dẫn đến thư mục nhị phân dùng để thực thi các câu lệnh bash.  
+Các  bash script file muốn chạy bash shell, dòng đầu tiên sẽ chỉ tới file bash này: #!/bin/bash  
+Muốn các script file chạy theo shell khác, ta sẽ đổi đường dẫn cho shell đó, VD: #!/bin/rbash; #!/bin/zsh.  
+Một người dùng cũng có thể sử dụng shell theo tùy chọn bằng cách thay đổi đường dẫn shell file (xem $usermod -s [SHELL_DIRECTORY] [USER])
+#### /usr/sbin/nologin
+Đây là file dùng để thay đổi dòng tin nhắn mỗi khi có tài khoản đăng nhập sai, dùng để thay dòng thông báo mặc định
+File /etc/nologin.txt sẽ được đọc, nếu có.
 ### 9. Thư mục home user
+Đây là thư mục chứa các dữ liệu cá nhân như video, hình ảnh, file và các file cấu hình của tài khoản đó, thường được đặt trong /home/[USER_NAME].  
+Đường dẫn thư mục home có thể được tìm kiếm ở trong /etc/passwd, được di chuyển, thay đổi bằng $usermod -m
 ## 3. Quản lý mật khẩu user
 ### 1. Command : passwd, chpasswd
+#### passwd
+Dùng để đổi mật khẩu tài khoản
+  - $passwd [OPTIONS] [USER] Đổi mật khẩu
+    - -d	Xóa mật khẩu (mật khẩu sẽ thành để trống)
+    - -e	Cho mật khẩu hiện thời hết hạn luôn, người dùng sẽ phải đổi mật khẩu với lần đăng nhập sau
+    - -l	Khóa mật khẩu, người dùng sẽ không thể thay đổi mật khẩu
+    - -u	Mở khóa mật khẩu
+    - -S	Hiện thông tin về mật khẩu
+*Muốn cho tài khoản không đăng nhập được (vẫn giữ nguyên mật khẩu), phải dùng usermod -L [USER]
+#### chpasswd
+Lệnh này dùng để thay đổi mật khẩu cho nhiều tài khoản cùng lúc. $chpasswd sẽ lấy input đầu vào và sẽ thay đổi mật khẩu của nhưng tài khoản đó.  
+- VD
+  - $echo '[USER]:[NEW_PASSWORD]' | sudo chpasswd
+  - $cat [FILE_USERNAME] > sudo chpasswd
 ### 2. Shadow file : /etc/shadow
+Đây là file lưu trữ mật khẩu được mã hóa và một sô thông tin liên quan đến mật khẩu. Dù mật khẩu được lưu dưới dạng mã hóa nhưng file này chỉ đượcc quyền root duy nhất vào đọc, giúp tăng khả năng bảo vệ tài khoản.  
+Có tất cả 9 trường thông tin trong file, được ngăn cách bởi dấu :
+  - 1.Tên tài khoản
+  - 2.Mật khẩu dưới dạng mã hóa
+  - 3.Ngày thay đổi cuối (tính từ 1/1/1970)
+  - 4.Tuổi thọ ngắn nhất của mật khẩu: cần phải số ngày ít nhất thì mới được đổi mật khẩu tiếp
+  - 5.Tuổi thọ dài nhất cảu mật khẩu: cần phải đổi mật khẩu trước số ngày này trước khi bị hết hạn
+  - 6.Ngày cảnh báo hết hạn: giúp cảnh báo trước số lượng ngày trước khi mật khẩu bị hết hạn
+  - 7.Ngày cảnh báo quá hạn: giúp cảnh báo trước số lượng ngày sau khi mật khẩu bị hết hạn
+  - 8.Ngày hết hạn của tài khoản: Tính từ 1/1/1970
+  - 9.Trường này được dự trữ để dùng cho sau này
+*Các giá trị mặc định được khởi tạo ở /etc/login.defs*
 ### 3. Mã hoá mật khẩu
-### 4. File cấu hình /etc/login.def
+- Trường mật khẩu lại chia ra làm 3 trường con, ngăn cách bởi $
+  - Số từ 1-6	quy định thuật toán mã hóa
+  - hash_salt	mật khẩu salt sinh ra ngẫu nhiên cho từng user được thêm vào mật khẩu chính và được mã hóa cùng với mật khẩu chính
+  - hash_data	phần (mật khẩu + salt) đã được mã hóa
+ - Với hash_salt, mật khẩu thực sẽ được dài thêm một đoạn kí tự ngẫu nhiên, rồi sau đó mới được mã hóa trên hệ thống. Điều này giúp bảo vệ những mật khẩu yếu và những mật khẩu bị trùng nhau khi bị tấn công vét cạn.
+### 4. File cấu hình /etc/login.defs
+Đây là file cấu hình mặc định khi ta thực hiện một số lệnh khởi tạo và xóa người dùng, nhóm. Hệ điều hành sẽ sử dụng các giá trị trong /etc/login.defs để tự động gán các giá trị cho chúng.  
+Một số giá trị trong file  
+  - PASS_MAX_DAYS
+  - PASS_MIN_DAYS
+  - UID_MIN
+  - UID_MAX
+  - CREATE_HOME
+*Đầy đủ các giá trị của login.defs có thể xem ở http://man7.org/linux/man-pages/man5/login.defs.5.html*
 ### 5. Banner login
+Đây là những dòng thông báo/cảnh báo người dùng khi đăng nhập vào hệ thống. Mỗi server cần có một banner login để tránh những người dùng ngây thơ cố tình đăng nhập trái phép vào hệ thống.
+ - Thay đổi banner login : $ sudo vi /etc/issue.net
+ - Thay đổi đường dẫn banner login với trên ssh: 
+  - $sudo vi /etc/ssh/sshd_config
+    - Chỉnh sửa đường dẫn banner tại: Banner /etc/issue.net (hoặc link khác)
+ - Khởi động lại ssh service: systemctl restart ssh (restart/stop/start)
 ## 4. Quản lý nhóm  
 ### 1. Command : groupadd, groupdel, usermod, groupmod, gpasswd, newgrp, vigr
+#### groupadd
+Dùng để thêm nhóm mới
+ - $groupadd [OPTION] [GROUP_NAME]
+  - -g [GID]	Gán GID cho group đó, nếu không sẽ được gán theo số mặc định
+  - -r [SID]	Gán SID cho group đó (SystemID)
+#### groupdel
+Dùng để xóa nhóm
+ - $groupdel [OPTION] [GROUP_NAME]
+*$groupdel chỉ được xóa với những group không phải là group chính, và phải xóa người dùng ra khỏi group chính đó trước. Cần phải check những file nào đang thuộc quản lý của group đó trước khi xóa*
+#### groupmod
+Dùng để thay đổi cấu hình nhóm
+ - $group [OPTIONS] [GROUP_NAME]
+  - -g [GID]	Đổi GID của group
+  - -n [NEW_GROUP]	Đổi tên group
+#### gpasswd
+Dùng để quản lý nhóm
+ - $group [OPTIONS] [GROUP_NAME]
+  - $group [GROUP_NAME]	Thay đổi mật khẩu cho nhóm
+  - -a [USER]	Thêm user vào nhóm
+  - -d [USER]	Xóa user khỏi nhóm
+  - -r	Xóa mật khẩu nhóm
+  - -A	[USERS]	Đặt quyền admin cho nhiều người dùng
+  - -M [MEMBERS]	Đặt quyền member cho nhiều người dùng
+#### newgrp
+Lệnh này dùng để thêm người dùng hiện tại gán vào group mới
+ - $newgrp [-] [GROUP_NAME]	thêm người dùng hiện tại vào group mới
+  - -	Nếu tham gia thành công, khởi tạo lại terminal cho khớp với policy group
+ 
+#### vigr và vipw
+Hai lệnh này dùng để truy cập và chỉnh sửa một cách nhanh chóng /etc/passwd và /etc/groups.  
 ### 2. Tìm hiểu nhóm sudo (wheel)
+Sudo (superuser do) là một lệnh dùng để thực thi với quyền root.  
+Wheel là tên một group, được gán quyền thực thi sudo cụ thể trong /etc/sudoers. (tên group tùy chọn)  
+Khi user được add vào group wheel, user đó sẽ được cấp quyền thực thi sudo.
 ### 3. So sánh nhóm : sudo (wheel) và root
+Root có quyền thực thi cao nhất, không hề bị giới hạn bởi bất kì lệnh hay file nào.  
+Sudo group chỉ được cấp quyền sudo cụ thể qua /etc/sudoers (Đôi khi chỉ có quyền sudo write/read/execute), nếu không được cấu hình qua sudoers, thì group đó không được thực thi quyền sudo nữa.
 ### 4. Thực hiện command dưới quyền sudo
+Khi user muốn thực thi với quyền sudo, thì trước câu lệnh sẽ thêm lệnh $sudo vào đầu, kèm theo đó là yêu cầu mật khẩu của chính người dùng đó (không phải mật khẩu root).
 ## 5. User profiles  
 ### 1. system profile
+Hệ thống Linux có một profile dùng để thực thi mỗi khi có người dùng đăng nhập vào. Nó được chứa trong /etc/profile.  
+Khi hệ thống khởi tạo, file /etc/profile bao gồm cacstham số hệ thống cần thiết cung cấp cho mỗi user. Sau đó sẽ chạy file /etc/bash.bashrc, khởi tạo hầu hết các cấu hình. Sau đó thư mục /etc/profile.d sẽ được kiểm tra các script nếu có, để cài đặt cho các ứng dụng khác.
 ### 2. ~/.bash_profile
 ### 3. ~/.bash_login
 ### 4. ~/.profile
