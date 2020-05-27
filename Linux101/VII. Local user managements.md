@@ -52,7 +52,7 @@ Trên hệ thống Linux có 3 loại tài khoản người dùng chính: admini
    - Command_Alias SHUTDOWN_CMDS = /sbin/poweroff, /sbin/reboot, /sbin/halt
 #### Đặc tả riêng cho người dùng
 Dây là nơi mà lệnh $who sẽ sử dụng. Cấu trúc của nó như sau
-- <user list> <host list> = <operator list> <tag list> <command list>
+- < user list > < host list > = < operator list > < tag list > < command list >
   - User list	là một nhóm người hoặc 1 bí danhkhác
   - Host list	là một nhóm host hoặc bí danh host
   - Operation list	là một nhóm người, bí danh được cấp quyền như Runas_Alias
@@ -191,8 +191,8 @@ Dùng để thay đổi cấu hình nhóm
   - -n [NEW_GROUP]	Đổi tên group
 #### gpasswd
 Dùng để quản lý nhóm
- - $group [OPTIONS] [GROUP_NAME]
-  - $group [GROUP_NAME]	Thay đổi mật khẩu cho nhóm
+ - $gpasswd [OPTIONS] [GROUP_NAME]
+  - $gpasswd [GROUP_NAME]	Thay đổi mật khẩu cho nhóm
   - -a [USER]	Thêm user vào nhóm
   - -d [USER]	Xóa user khỏi nhóm
   - -r	Xóa mật khẩu nhóm
@@ -219,10 +219,18 @@ Khi user muốn thực thi với quyền sudo, thì trước câu lệnh sẽ th
 Hệ thống Linux có một profile dùng để thực thi mỗi khi có người dùng đăng nhập vào. Nó được chứa trong /etc/profile.  
 Khi hệ thống khởi tạo, file /etc/profile bao gồm cacstham số hệ thống cần thiết cung cấp cho mỗi user. Sau đó sẽ chạy file /etc/bash.bashrc, khởi tạo hầu hết các cấu hình. Sau đó thư mục /etc/profile.d sẽ được kiểm tra các script nếu có, để cài đặt cho các ứng dụng khác.
 ### 2. ~/.bash_profile
+Nếu có file này trên thư mục home, hệ thống sẽ tìm bash trên đó và sử dụng. Nó cũng thêm biến $HOME/bin vào biến $PATH
 ### 3. ~/.bash_login
+Nếu không có file ~/.bash_profile, thì bash sẽ kiểm tra ~/.bash_login và lấy nguồn của nó.
 ### 4. ~/.profile
+Nếu vẫn không có file ~/.bash_profile, thì bash sẽ tìm kiếm ~/.profile với chức năng tương tự, và có thể gọi ~/.bashrc nếu có.
 ### 5. ~/.bashrc
+~/.bashrc thường được dẫn nguồn bởi các script khác. ~/.bashrc kiểm tra /etc/bashrc và lấy nguồn của nó.  
+~/.bashrc sẽ cấu hình các biến môi trường, lưu trữ các lệnh bí danh (alisas command) và tìm cả các bí danh trên ~/.bash_aliases nếu có.
 ### 6. ~/.bash_logout
+Dùng để xóa console khi thoát bash.
+*/etc/profile và /etc/bash.bashrc sẽ được gọi bởi hệ thống với mọi người dùng; còn ~/. nằm trong thư mục cá nhân nên sẽ được gọi đè và khác nhau với mỗi người dùng.*
+*~/.profile sẽ khởi động mỗi khi đăng nhập; ~/.bashrc sẽ được khởi động mỗi khi mở một console mới.
 
 
 
