@@ -39,7 +39,7 @@
 
   - Lớp dưới cùng là lớp mã nguồn phụ thuộc vào phần cứng, quản lý từng loại phần cứng khác nhau.
 	
-###2.Kernel, Shell là gì
+### 2.Kernel, Shell là gì
  - Kernel là thành phần trung tâm của một hệ máy tính. Nó thường là tầng mức trừu tượng nhất của máy tính, cung cấp giao tiếp giữa phần vật lý của thiết bị(Ram, CPU, Disk, Network card,...) đến lớp bên trên.
 	Một số loại Kernel chính:
   - Kernel nguyên khối: OS và Kernel cùng chạy trong 1 không gian bộ nhớ.

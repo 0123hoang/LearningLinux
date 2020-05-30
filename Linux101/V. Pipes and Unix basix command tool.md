@@ -13,7 +13,7 @@
 ### 2. Điều hướng input, output, error 
 - Ngoài việc nhập/xuất dữ liệu trực tiếp qua cửa sổ dòng lệnh, ta có thể chuyển hướng luồng dữ liệu qua các nguồn khác nhau, ví dụ như file, các thiết bị như màn hình, chuột, ổ cứng, lưu lượng mạng,... đều có thể là nguồn gửi đi input và là nơi xuất ra output tương ứng.
   - < hoặc 0<	: stdin
-  - > hoặc 1>	: stdout
+  - \> hoặc 1>	: stdout
   - 2>	:stderr
 ### 3. > và >> khi điều hướng output và error
 Trên cửa sổ dòngdòng lệnh có một số cách để điều hướng input, output
@@ -40,7 +40,7 @@ Trên cửa sổ dòngdòng lệnh có một số cách để điều hướng i
     -c [SCOPE_1],[SCOPE_2]	Lấy lượng kí tự tương ứng trên các dòng (Bắt đầu thứ tự là 1)
     -b	Lấy lượng byte tương ứng trên các dòng
     -f	Lấy lượng đoạn tương ứng, sử dụng thêm cới -d [char] dùng để định nghĩa dấu ngăn cách
-    --output-delimiter=[STRING]		Ngăn cách các phần tử bằng [STRING] được định nghĩa
+    - -output-delimiter=[STRING]		Ngăn cách các phần tử bằng [STRING] được định nghĩa
   - Trong đó [SCOPE] được biểu diễn như sau:
     -	N	Chỉ riêng phần tử thứ N
     -	N-	Từ phần tử thứ N trở đi

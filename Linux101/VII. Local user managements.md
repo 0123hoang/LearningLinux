@@ -79,8 +79,7 @@ Câu trúc file gồm có 7 trường chính
 - Tài khoản root là tên người dùng hoặc tài khoản mà theo mặc định có quyền truy cập vào tất cả các lệnh và file trên Linux hoặc hệ điều hành giống Unix khác. Root cũng được gọi là tài khoản root, người dùng root và siêu người dùng. Tài khoản root là đặc quyền lớn nhất trên hệ thống và có quyền lực tuyệt đối đối với nó (tức là truy cập đầy đủ vào tất cả các file và lệnh). Một trong số các quyền hạn của root là khả năng sửa đổi hệ thống theo bất kỳ cách nào bạn muốn, cũng như cấp và thu hồi quyền truy cập (nghĩa là khả năng đọc, sửa đổi và thực thi các file và thư mục cụ thể) cho những user khác, kể cả mặc định dành riêng cho root.
  - Đăng nhập vào tài khoản root bằng lệnh $sudo su -
 ### 4. useradd và file cấu hình /etc/default/useradd
-#### useradd 
-Lệnh này dùng để thêm một người dùng mới
+Lệnh này dùng để thêm một người dùng mới  
     - -g	[UID]	Gán UID group 
     - -u [UID]	Tạo UID 
     - -U	Tạo một user group mới gán cho user mới có ID trùng nhau

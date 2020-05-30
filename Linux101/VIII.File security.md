@@ -13,11 +13,11 @@ Quyền hạn trong Linux được thực hiện tương tự so với môi trư
  - s	Socket: Dùng cho kết nối giữa các processes. Chúng cũng được dùng cho các dịch vụ như X windows, syslog và etc. Socket có thể xử lí đồng thời hai luồng vào và ra cùng lúc và cho phép nhiều người dùng cùng truy cập kết nối đồng thời. VD: kết nối ssh qua port socket 22
  - p	Named pipe: Cũng dùng cho các kết nỗi giữa các processes nhưng bị giới hạn truy cập: chỉ 1 kết nối vào, và 1 đầu ra (FIFO). VD: [COMMAND] | [COMMAND] nghĩa là dùng pipe() thông qua | để truyền input từ process trước sang process sau.
  - l	Liên kết tượng trưng (symbolic link): Có thể hiểu là 1 hoặc nhiều con trỏ trỏ đến file gốc. Có hai loại symbolic link:
- !(Hardlink){https://kythuatmaytinh.files.wordpress.com/2012/02/hard.png}
+ ![alt Hardlink]{https://kythuatmaytinh.files.wordpress.com/2012/02/hard.png}
   - Hard links: Tạo một file mới có giá trị inode trùng với file gốc
    - VD: [a]->[data]; [b]->[data]; Nếu xóa [b] thì [a]->[data], [null]->[data]; Do vậy dữ liệu gốc vẫn có thể truy cập, sửa xóa với hardlink [a]
    
-  !(Softlink){https://kythuatmaytinh.files.wordpress.com/2012/02/soft.png}
+  ![alt Softlink]{https://kythuatmaytinh.files.wordpress.com/2012/02/soft.png}
   - Soft links: Tạo một file mới có giá trị inode trỏ tới địa chỉ file gốc ( # với địa chỉ inode file mới)
    - VD: [a]->[b]; [b]->[data]; Nếu xóa [b] thì [a]->[null],[null]->[data]; Do vậy dữ liệu gốc đã bị xóa, không thể truy cập được.
 *Có thể tạo softlink tới bất cứ file nào, nhưng quyền hạn truy cập file thì vẫn phụ thuộc vào file chính.*

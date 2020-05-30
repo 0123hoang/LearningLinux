@@ -13,18 +13,17 @@
  - Với mong muốn tạo ra một hệ điều hành tự do, hoạt động được trên máy tính riêng của mình, bằng việc dựa theo MIMIX, Linus Torvald, khi ấy là một sinh viên 21 tuổi học ngành Khoa học máy tính, đã phát triển một hệ điều hành riêng, và chia sẻ nó qua một cộng đồng mạng, với mong muốn mọi người trải nghiệm và phản hồi. Từ đó Linux trở nên nổi tiếng và được sử dụng rộng rãi.
 ### 3. Linux đến hiện tại
  - Đến nay, Linux đã được đông đảo cộng đồng đón nhận và sử dụng, được các lập trình viên cùng nhau nâng cấp, gỡ lỗi hệ điều hành miễn phí này, khiến nó hoạt động càng trở nên tối ưu và hiệu quả.
- - 
 ## 2.Các bản phân phối : Redhat, Centos, Debian, Ubuntu, khác
 <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Linux_Distribution_Timeline.svg">
 
 Dựa theo liên kết miêu tả sơ bộ các phiên bản của Linux, ta thấy hệ điều hành mã nguồn mở này đã kích thích sự sáng tạo của cộng đồng lập trình viên máy tính, cho ra đời vô số phiên bản khác nhau. Một số thì đã không được phát triển nữa, một số thì vẫn còn phát triển mạnh mẽ và được tin dùng đến ngày nay. Ta sẽ đi tìm hiểu một số phiên bản phổ biến của Linux hiện nay
-###1. Redhat
+### 1. Redhat
  - Phiên bản đầu tiên vào năm 1994 do công ty Redhat phát hành, được khuyến nghị sử dụng cho các doanh nghiệp lớn.
-###2. CentOS
+### 2. CentOS
  - Được phát hành đầu tiên vào năm 2004, sau đó đến năm 2014 gia nhập vào công ty Redhat. CentOS thích hợp sử dụng làm server cho các doanh nghiệp nhỏ và vừa bởi sự ổn định, miễn phí và cộng đồng lớn mạnh.
-###3. Ubuntu
+### 3. Ubuntu
  - Được ra mắt vào năm 2004, bắt đầu do một nhóm nhà phát triển Debian lập nên. Với lợi thế gọn nhẹ, tiêu hao tài nguyên ít, mã nguồn mở, kho thư viện đồ sộ, Ubuntu thích hợp để sử dụng cho nhu cầu cá nhân để học tập và làm việc, và một số biến thể của nó cũng được dùng cho server như OpenStack Cloud,...
- - 4. Debian
+### 4. Debian
  - Có khởi đầu rất sớm là năm 1993, các phiên bản của Debian mang lại sự ổn định lâu dài, vì vậy thích hợp cho việc sử dụng cho các server.
 
 ## 3. Vì sao lại lựa chọn Linux thay Window?
