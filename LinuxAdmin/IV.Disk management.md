@@ -138,7 +138,7 @@ Có 3 loại phân vùng chính: primary, extended và logical.
   - $sudo mount /dev/[DEV_NAME] [NEW_FOLDER]	Mount phân vùng đó vào thư mục vừa tạo
   - $df -Th	Để kiểm tra 
 ### 5.3. Command: du, df, mount, umount
-#### duaa
+#### du
  - Kiểm tra bộ nhớ đã bị chiếm dụng (theo từng khối)
  - $du -ha	Kiểm tra bộ nhớ của từng file/folder hiện tại
  - $du -a --apparent-size Hiện bộ nhớ chiếm dụng theo byte chính x
@@ -186,17 +186,37 @@ Có 6 loại RAID, nhưng thường các loại được sử dụng như sau:
  - Logical Volume Management (VLM) là một phương pháp quản lý các storage device, các logical volume dễ dàng, linh hoạt hơn. Với VLM bạn có thể thay đổi kích thước mà không cần phải sửa lại partition table của hệ điều hành.
 ![alt Sơ đồ VLM](https://news.cloud365.vn/wp-content/uploads/2019/08/LVM.png)
 ### 6.3. Các thuật ngữ: physical volume (pv), volume group (vg), logical volume (lv)
- - Physical volume (pv): Là những thành phần cơ bản được sử dụng bởi LVM dể xây dựng lên các tầng cao hơn . Một Physical Volume không thể mở rộng ra ngoài phạm vi một ổ đĩa. Chúng ta có thể kết hợp nhiều Physical Volume thành Volume Groups.
-  - Tạo pv: $pvcreate /dev/[DEV_NAME]
-  - Kiểm tra pv: $pvs
+ - Physical volume (pv): Là những thành phần cơ bản được sử dụng bởi LVM dể xây dựng lên các tầng cao hơn . Một Physical Volume không thể mở rộng ra ngoài phạm vi một ổ đĩa. Chúng ta có thể kết hợp nhiều Physical Volume thành Volume Groups. 
  - Volume group (vg): Nhiều Physical Volume trên những ổ đĩa khác nhau được kết hợp lại thành một Volume Group. Volume Group được sử dụng để tạo ra các Logical Volume, trong đó người dùng có thể tạo, thay đổi kích thước, lưu trữ, gỡ bỏ và sử dụng.
-  - Tạo vg: vgcreate /dev/[DEV_NAME]
-  - Kiểm tra pv: $vgs
  - Logical volume (lv): Một Volume Group được chia nhỏ thành nhiều Logical Volume. Nó được dùng cho các để mount tới hệ thống tập tin (File System) và được format với những chuẩn định dạng khác nhau như ext2, ext3, ext4…
-  - Tạo lv: lvcreate /dev/[DEV_NAME]
+ - Sau đó để sử dụng phân vùng đó ta cần tạo filesystem trên đó (mkfs), rồi mount. 
+### 6.4. Work with volume group 
+#### Create volume gr
+  - Tạo vg: $vgcreate [NAME] /dev/[PV_NAME]
+  - Kiểm tra pv: $vgs
+#### Add pv to vg
+ - $vgextend VG PV
+#### Remove pv from vg
+ - $vgreduce VG PV
+ - $vgreduce --removemissing VG Loại bỏ unknown pv trên vg
+#### Add lv to vg
+ - - $lvcreate -L [NUMBER][M,G,T] -n [NAME] /dev/[VG_NAME] [PV]
+#### Remove lv to vg
+ - lvremove /dev/[VG]/[LV]
+### 6.4. Work with physical volume
+#### Create PV
+ - $pvcreate /dev/[DEV_NAME]
+  - Kiểm tra pv: $pvs
+#### Extend PV
+ - $pvresize /dev/[PV_NAME] --setphysicalvolumesize [NUMBER][M,G,T]
+#### Remove unknown PV
+![image](https://user-images.githubusercontent.com/43545058/84465588-9653ae00-aca1-11ea-986f-7784f89226d9.png)
+Có thể xảy ra khi ta tạo thêm 1 phân vùng -thật- mới trên pv mà vg đang quản lý
+ - $vgreduce --removemissing /dev/[VG_NAME]
+### 6.5. Work with logical volume
+#### Create lv
+ - $lvcreate -L [NUMBER][M,G,T] -n [NAME] /dev/[VG_NAME] [PV]
   - Kiểm tra pv: $lvs
- - Sau đó để sử dụng phân vùng đó ta cần mount trước, rồi tạo filesystem trên đó (mkfs)
-### 6.4. Example: work with logical volume
 #### Extend logical volume 
 VD  
  - $lvextend -L [+]2G /dev/[DEV_NAME]	Thực hiện lệnh thêm kích thước
@@ -208,17 +228,42 @@ VD
  - $df -Th /dev/[LV_NAME]	Kiểm tra dung lượng tổng của lv
 -> Từ đó ta có thể biết được tối ra có thể rút gọn lại bao nhiêu dung lượng
 Trình tự các bước để resize như nhau: umount->reduce filesystem->reduce lv-> remount.  
- - umount /dev/[DEV_NAME]	unmount lv
+ - $umount /dev/[DEV_NAME]	unmount lv
  - $e2fsck -f /dev/[DEV_NAME]	Kiểm tra filesystem sau khi umount (Pass cả 5 thì ổn)
  - $resize2fs /dev/[DEV_NAME] [NUMBER][G|T]	Resize lại filesystem
  - $lvreduce -L [-][NUMBER][K,M,G,T] /dev/[DEV_NAME]	Resize lại lv
  - $e2fsck -f /dev/[DEV_NAME]	Check lại cho chắc
  - $mount /dev/[DEV_NAME] /[MOUNT_PATH]	remount lại lv
-
-#### Mirror a logical volume
+### 6.6. Work with mirror volume
+#### Create new volume with 1 mirror
+Mirror cần phải được đặt ở pv khác nhau.  
+ - $lvcreate -L [NUMBER][G,M,T,] -m1 --type mirror -n [VOLUME_NAME] /dev/[VOLUME_GROUP_NAME] [PV]
+  - --corelog : logfile được lưu trữ ở RAM, còn bt thì sẽ tạo một log volume khác trên 1 PV khác.
+#### Create mirror with existing volume
+ - lvconvert -m1 --type mirror /dev/[VOLUME_NAME] [PV]
+  - --corelog : logfile được lưu trữ ở RAM, còn bt thì sẽ tạo một log volume khác
+#### Delete mirror 
+ - $lvconvert -m0  /dev/[VOLUME_NAME] [PV_Will_deleted]
 #### Xóa logical volume
  - $umount /dev/[DEV_NAME]
  - $lvremove /dev/ơDEV_NAME]
-### 6.5. Example: resize a physical volume
-### 6.6. Example: mirror a logical volume
-### 6.7. Example: snapshot a logical volume
+### 6.7. Work with snapshot volume
+#### Create snapshot
+ - Snapshot là trạng thái cảu máy ở trong 2 thời điểm cụ thể. Tạo snapshot có thể giúp trích xuất thông tin mà không cần phải tác động trực tiếp đến csdl, có thể phục hồi một số tác vụ. Snapshot có thời gian lưu trữ ngắn hạn khi so với backup.
+Tạo 1 snapshot mới.  
+ - $lvcreate -s -L [SIZE] -n [NAME] /dev/[LV_NAME] [PV]
+*snapshot có thể sẽ bị phình, tốt nhất là để nó có dung lượng bằng với dung lượng gốc*
+#### Remove snapshot
+ - $lvremove /dev/[SNAPSHOT_NAME]
+#### Extend snapshot
+ - $lvextend -L +[NUMBER][G,M,T] /dev/[SNAPSHOT_LV]
+#### Extend snapshot automatically
+ - Chỉnh sửa file /etc/lvm/lvm/conf:
+  - snapshot_autoextend_threshold = 100 (chỉnh sửa % dung lượng snapshot lv khi đạt tới ngưỡng nào thì sẽ extend)
+  - snapshot_autoextend_percent = 20 (chỉnh sửa % dung lượng snapshot lv được tăng lên bao nhiêu)
+#### Restore snapshot
+Khi lv chính bị hỏng, ta muốn quay lại phiên bản gần nhất của nó được lưu trên snapshot.  
+ - $umount /dev/[LV_NAME]	unmount lv chính ra
+ - $lvconvert --merge /dev/[SNAPSHOT_LV]	chuyển đổi snapshot lv sang lv chính. Snapshot lv sẽ được xóa tại bước này.
+ - $mount .....	mount lại
+
