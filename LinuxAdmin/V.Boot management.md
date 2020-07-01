@@ -34,17 +34,18 @@
 ### 2.2 What is runlevels, runlevel configuration
 #### Runlevels
  - Khi tiến trình init (PID 1) khởi tạo các tiến trình khác, nó sẽ dựa vào runlevel để quyết định thực thi các script tương ứng tại /etc/rc.d, với kí tự K ở đầu tương ứng cho khởi động, còn S tương ứng cho việc kết thúc.
-So sánh runlevel của SysV và systemd targets
-|Sysvinit Runlevel|Systemd Target| Function|
-|---|---|---|
-|0|runlevel0.target, poweroff.target|System halt/shutdown|
-|1,S,SINGLE|runlevel1.target, rescue.target|Single-user mode|
-|2,4|runlevel2.target, runlevel4.target, multi-user.target|User-defined/Site-specific runlevels. By default, identical to 3.|
-|3|runlevel3.target, multi-user.target|Multi-user, non-graphical mode, text console only|
-|5|runlevel5.target, graphical.target|Multi-user, graphical mode|
-|6|runlevel6.target, reboot.target|Reboot|
-|emergency|emergency.target|Emergency mode|
-#### RUnlevels configuration
+So sánh runlevel của SysV và systemd targets:  
+
+| Sysvinit Runlevel|Systemd Target                   |Function            |  
+|-----------------|---------------------------------|--------------------|  
+|0                |runlevel0.target, poweroff.target|System halt/shutdown|
+|1,S,SINGLE|runlevel1.target, rescue.target|Single-user mode|  
+|2,4|runlevel2.target, runlevel4.target, multi-user.target|User-defined/Site-specific runlevels. By default, identical to 3|  
+|3|runlevel3.target, multi-user.target|Multi-user, non-graphical mode, text console only|  
+|5|runlevel5.target, graphical.target|Multi-user, graphical mode|  
+|6|runlevel6.target, reboot.target|Reboot|  
+|emergency|emergency.target|Emergency mode|  
+#### Runlevels configuration
 Hệ thống init cổ điển SysV đã được thay thế bởi systemd.
  - Xem các targets có thể có
   - $systemctl list-units --type=target
