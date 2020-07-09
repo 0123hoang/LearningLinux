@@ -101,6 +101,8 @@
   - ACCEPT
   - DROP
   - REJECT
+  - SNAT
+  - MASQUERADE
 ![image Sự khác biệt giữa DROP và REJECT](https://user-images.githubusercontent.com/43545058/86877661-82209680-c111-11ea-8191-f899f04f8e9b.png)
   - QUEUE	Packet được gửi tới user-space
   
