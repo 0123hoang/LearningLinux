@@ -5,17 +5,17 @@
  - 3. Server DC có thể liên hệ với PC 1 trên cổng 22 thông qua địa chỉ IP Public của Server nội bộ.  
 
 ## 2.Mô hình thiết kế mô phỏng đáp ứng
-![image](https://user-images.githubusercontent.com/43545058/86992537-ea33b300-c1cb-11ea-9a63-cf662fc3f38f.png)
+![image](https://user-images.githubusercontent.com/43545058/87114366-93e17580-c29a-11ea-8192-5ddd6a4f22f5.png)
  - PC1 <==> PC1
  - PC2 <==> PC2
  - Private network <==> Mạng nội bộ trong VMware (172.16.0.0/24)
  - Server <==> PC thật (có IP mạng cty truy cập mạng) sử dụng VMware (có chức năng NAT từ mạng nội bộ VMware).
- - Public network <==> Mạng nội bộ của cty (192.168.100.0/24)
+ - Public network <==> Mạng nội bộ của cty (192.168.101.0/24)
  - Server DC <==> Một máy tính khác thuộc mạng nội bộ cty
 ## 3.Giải pháp thực hiện
 ### Cài đặt sẵn có
- - PC thật sử dụng Ubuntu 20.04, kết nối với mạng nội bộ cty với địa chỉ 192.168.100.243/24.
- - PC thật có cài đặt VMware. VMware sử dụng mạng NAT 172.16.0.0/24 là mạng nội bộ, default gate-way là 172.16.0.10
+ - PC thật sử dụng Ubuntu 20.04, kết nối với mạng nội bộ cty với địa chỉ 192.168.101.168/24.
+ - PC thật có cài đặt VMware. VMware sử dụng mạng NAT 172.16.0.0/24 là mạng nội bộ.
  - VMware có hai máy ảo CentOS 7 có cài đặt iptables-service.
 ### 1. Máy PC 2 chỉ có thể liên hệ với PC 1 trên cổng 22. 
  - Đặt default gateway của PC2 là IP của PC1 (có thể ping, ssh port 22), PC1 cho phép nhận tin từ cổng đó, không cho phép forwarding.
@@ -49,5 +49,12 @@
  ![image](https://user-images.githubusercontent.com/43545058/87026810-78c52600-c206-11ea-96c1-32cfe88fd01c.png)
  ![image PC2 thông qua PC1 ping tới một máy trạm ngẫu nhiên trên mạng ct](https://user-images.githubusercontent.com/43545058/87026863-8c708c80-c206-11ea-9fa7-b91846cb6581.png)
 ### 3. Server DC có thể liên hệ với PC 1 trên cổng 22 thông qua địa chỉ IP Public của Server nội bộ.
- - Từ 1 máy trạm nội bộ ping tới PC1
+*Thay bằng ssh bằng ping*
+ - Từ 1 máy trạm nội bộ ping tới PC1(thay bằng PC2)
  - Máy tính vật lí phải chuyển tiếp gói tin ping chứ không được xử lí gói tin
+ - Luồng gói tin ping PC2 <=> PC1(nat)(nat có ở lab trước) <=> PC vật lí(chuyển tiếp) <=> PC1
+ - Thêm rule cho máy tính vật lý:
+  - DNAT trước	$iptables -t nat -A PREROUTING -p icmp -j DNAT --to 192.168.101.248
+  - Sau đấy mới FORWARD	$iptables -t filter -A FORWARD -p icmp -j ACCEPT
+  - Rồi SNAT lại $iptables -t nat -A POSTROUTING -p icmp -j SNAT --to 192.168.101.162
+  ![image Trông như đang ping tới PC vật lý nhưng thực ra là PC1 đang trả lời](https://user-images.githubusercontent.com/43545058/87113716-1bc68000-c299-11ea-99ca-7592074a875e.png)

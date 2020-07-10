@@ -115,6 +115,7 @@
 
 ### 3.4 Cơ chế hoạt động của các rule trong IPtables
 ![image Sơ đồ trình tự kiểm tra của các chain](https://user-images.githubusercontent.com/43545058/86888926-295af900-c125-11ea-906c-5d762b9ecd89.png)
+ - Khi gói tin có đích là máy local thì nó sé đi theo nhánh INPUT, còn có đích không là máy local thì nó sẽ đi theo nhánh FORWARD, vì vậy nên sử dụng PREROUTING và POSTROUTING phù hợp
  - Trong một chain, các rule thực hiện theo thứ tự từ trên xuống dưới, khi thỏa mãn một rule bất kì có target là [ACCEPT|DROP...] thì sẽ dừng lại luôn, còn với target như QUEUE thì sẽ tiếp tục kiểm tra tiếp.
 
 ### 3.5 Tìm hiểu các command phổ biến trên IPtables
@@ -170,13 +171,21 @@ internal: đối lập với external zone, sử dụng cho phần nội bộ c�
  - Rich-rule: Các quy tắc được bổ sung
 ### 4.5 Tìm hiểu các command phổ biến trên firewalld-cmd
  - $firewall-cmd --zone=[ZONE]
-  - --add-service/--remove-service=[SERVICE]	cho phép service sử dụng (http,icmp,...)
+  - --add-service/--remove-service=[SERVICE]	cho phép service sử dụng (http,ssh,...)
+  - --get-service
   - --add-port/--remove-port=[PORT]/[PROTOCOL]
   - --add-sourse-port/--remove-source-port=[PORT]
   - --add-protocol/--remove-protocol=[PROTOCOL]
   - --reload
   - --list-all-zones
   - --set-default-zone=[ZONE]
+  - --get-active-zone
+  - --set-target=[default|ACCEPT|DROP|REJECT]
+  - nmcli connection add type ethernet con-name *connection-name* ifname *interface-name* (tạo một connection mới)
+  - nmcli c mod [DEV] connection.zone [internal/external/zone???]
+  - [--zone=external] --add-masquerade
+  - --permanent
+  - [--zone=external] --add-forward-port=port=[NUM] :proto=[PROTO] :toport=[NUM] : toaddr=[ADDR]
 ### 4.6 So sánh iptable service và firewalld service
  - Cả hai đều sử dụng với mục đích tương tự nhau.
  - iptable có cấu hình cú pháp chính xác, vì vậy đôi khi cần sử dụng cho công việc cụ thể gì đó cần phải thực hiện nhiều tùy chọn hơn cho các câu lệnh (ví dụ cần chặn nhiều cổng một lúc)
