@@ -186,6 +186,9 @@ internal: đối lập với external zone, sử dụng cho phần nội bộ c�
   - [--zone=external] --add-masquerade
   - --permanent
   - [--zone=external] --add-forward-port=port=[NUM] :proto=[PROTO] :toport=[NUM] : toaddr=[ADDR]
+  - Chọn zone cho kết nối:
+   - Kết nối tìm zone nào trùng với source trước, nếu không có thì tìm zone nào tùng với interface, nếu không có thì chuyển sang zone mặc định.
+   - Nếu các rule trùng với gói tin thì được phép qua, nếu không thì sẽ chuyển sang zone mặc định. Zone mặc định lại tiếp tục kiểm tra rule.
 ### 4.6 So sánh iptable service và firewalld service
  - Cả hai đều sử dụng với mục đích tương tự nhau.
  - iptable có cấu hình cú pháp chính xác, vì vậy đôi khi cần sử dụng cho công việc cụ thể gì đó cần phải thực hiện nhiều tùy chọn hơn cho các câu lệnh (ví dụ cần chặn nhiều cổng một lúc)

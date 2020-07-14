@@ -31,8 +31,18 @@
   - Đặt internal và external interface: 
     - $nmcli connection mod ens33 connection.zone external
     - $nmcli connection mod ens37 connection.zone internal
-  - Chặn 
+  - Đặt interface về rule	
+    - $firewall-cmd --zone=external --add-interface=ens33 --permanent
+    - $firewall-cmd --zone=internal --add-interface=ens37 --permanent
+  - Cấu hình nat:
+    - $firewall-cmd --zone=external --add-masquerade --permanent	
 #### 2.Chặn tất cả liên hệ giữa PC1 và PC2
+ - Firewalld không có cấu hình áp dụng bộ lọc với đích (destination), tuy vậy firewalld vẫn làm việc dựa trên iptables command, vì vậy ta có thể thêm rich rule một iptables command vào
+  - $firewall-cmd --direct --add-rule ipv4 -t filter OUTPUT -d 172.16.0.30 -p tcp -j DROP
 #### 3.Chặn PC1 truy cập vào website : baomoi.com
+ - Tạo một rich rule mới chặn truy cập vào web site đó
+  - $firewall-cmd --permanent --zone=internal --add-rich-rule='rule family=ipv4 source address=[IP] reject'
 #### 4.Máy ngoài internet có thể truy cập ssh vào PC2 bằng IP cổng ngoài của node firewalld
+ - $firewall-cmd --zone=external --add-forward-port=port=22:proto=tcp:toaddr=172.16.0.40	forward tới pc2
+ ![image](https://user-images.githubusercontent.com/43545058/87282420-71f82500-c51e-11ea-9f84-143a6f78ff56.png)
 
