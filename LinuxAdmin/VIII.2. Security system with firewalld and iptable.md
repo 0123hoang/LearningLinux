@@ -187,6 +187,7 @@ internal: đối lập với external zone, sử dụng cho phần nội bộ c�
   - --permanent
   - [--zone=external] --add-forward-port=port=[NUM] :proto=[PROTO] :toport=[NUM] : toaddr=[ADDR]
   - Chọn zone cho kết nối:
+   - Mỗi một source chỉ được có 1 zone, nhưng 1 zone có thể có nhiều source hoặc nhiều interface.
    - Kết nối tìm zone nào trùng với source trước, nếu không có thì tìm zone nào tùng với interface, nếu không có thì chuyển sang zone mặc định.
    - Nếu các rule trùng với gói tin thì được phép qua, nếu không thì sẽ chuyển sang zone mặc định. Zone mặc định lại tiếp tục kiểm tra rule.
 ### 4.6 So sánh iptable service và firewalld service

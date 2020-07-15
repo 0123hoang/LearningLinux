@@ -226,7 +226,7 @@ Dùng để tạo một file lập lịch riêng cho từng người dùng
     - -print/printf
     - -exec [COMMAND]
 #### curl
- - Là một lệnh dùng để gửi và nhận dữ liệu từ server, qua các giao thức được hỗ trợ sẵn
+ - Là một lệnh dùng để gửi dữ liệu tới server, qua các giao thức được hỗ trợ sẵn
  - $curl [SERVER]
  (SERVER có thể là http hoặc ftp,...)  
   - -0	DÙng http1.0 (bản lỗi thời)
@@ -241,7 +241,7 @@ Dùng để tạo một file lập lịch riêng cho từng người dùng
   - -u [USERNAME]:[PASSWORD] Sử dụng tài khoản để tải file
   - -T [FILENAME] [LOCATION] Upload file lên 
 #### wget
- - $wget dùng để tải dữ liệu từ trên mạng về
+ - $wget dùng để tải dữ liệu từ trên mạng về theo giao thức http,https hoặc ftp
  - $wget [OPTION] [URL]
   - -b	Tải ở background
   - -o [FILE]	Đưa output ra file đó
@@ -306,11 +306,156 @@ Chứa thông tin của các thiết bị, tiến trình đã thực hiện ng�
   - localectl set-locale [VARIABLE]=[LOCALE]	Thay đổi locale
 *locale được lưu trữ ở /etc/default/locale hoặc /etc/locale.conf*
 ### 1.16 File /etc/hosts
+ - File host là một tập tin lưu trữ thông tin IP của các máy chủ và tên miền (domain) được trỏ tới. Nó có thể được gọi là một DNS nhỏ trên máy tính của bạn. File host giúp cho các hệ điều hành biết được IP của máy chủ nơi một tên miền cụ thể nào đó được quản lý. Máy tính luôn kiểm tra file này đầu tiên trước khi thực hiện việc tìm kiếm trên server DNS ngoài.
+ - Cấu trúc file hosts
+  - [IP_ADDRESS] [NAME] [CNAME]
+  - Trong đó [NAME] và [CNAME] là URL hoặc là tên phụ của địa chỉ IP đó.
 ### 1.17 system hardware infomation
+#### Kiểm tra dung lượng ổ cứng
+ - $lsblk
+  - -a	Hiển thị tất cả
+  - -p Đường dẫn tuyệt đối
+  - -t [column]	Hiện theo tree (thường column lấy SIZE)
+  - -f	Hiện file s
+ - $lvs
+ - $fdisk
+ - $df
+
+#### Kiểm tra thông tin phần cứng
+ - $lshw	Kiểm tra phần cứng chung
+ - $lsusb	Kiểm tra các kết nối usb (chuột, bàn phím...)
+ - $lscpu	Kiểm tra thông tin cpu
+#### Xem RAM,cpu,...
+ - $vmstat
+ - $nmon
+ - $htop
 ### 1.18 tip and trick keyboard
-### 1.19 wget, curl,scp command
+|Key| Công dụng|
+|---|---|
+|Alt+B hoặc ctrl+ <-|Lùi bên trái 1 từ|
+|Alt+F hoặc ctrl+ ->|Lùi bên phải 1 từ|
+|ctrl+E hoặc End| Cuối dòng|
+|ctrl+A hoặc Home| Đầu dòng|
+|ctrl+U|Xóa từ đầu dòng đến con trỏ|
+|ctrl+K|Xóa từ con trỏ đến cuối dòng|
+|Super+ Up/Down|Phóng to/Thu nhỏ sửa sổ|
+|Super+ 1-9| Khởi động nhanh ứng dụng từ thanh công cụ|
+### 1.19 scp command
+- $scp gửi dữ liệu giữa hai host với nhau qua ssh
+ - $csp [OPTIONS] [SOURCE] [TARGET]
+  - [SOURCE]  là tập tin có thể trên máy local hoặc máy trên mạng
+  - [TARGET] có thể là máy local hoặc máy trên mạng
+  - -4/-6 Sử dụng ipv4/v6
+  - -P [PORT] Sử dụng port nào
+  - -v	Hiện nhiều thông tin hơn
+  
 ## 2. Tìm hiểu Bash Script  
 ### 2.1 Tìm hiểu các cú pháp cơ bản thường dùng trong Bash Script
+#### Cấu trúc file bash
+ - Đuôi là .sh
+ - Nội dung file bash
+ #!/bin/bash	//Chỉ ra shell thực thi, dòng đầu tiên của file bắt buộc ntn  
+// tiếp theo là những câu lệnh thực thi  
+#### Sử dụng file bash .sh
+ - $bash filename.sh hoặc
+ - Đưa file bash vào trong những folder trong $PATH, rồi $[FILENAME]
+ - Nếu không thì phải chỉ ra địa chỉ của tệp này: $ ./[FILENAME]
+#### Truyền tham số cho bash script
+ - $ bash [FILE] [ARG1] [ARGn]....
+ - Sử dụng tham số
+  - $0: Tên file
+  - $1: Tham số thứ 1 [ARG1]
+  - $2: Tham số thứ 2 [ARG2]...
+*$ trước kí tự biểu thị đó là biến*
+
+#### Input/Output
+##### Input truyền từ tham số (ở trên)
+##### Input là các biến mỗi trường
+  - Đã có sẵn có chỉ việc lấy ra dùng
+  - $set để hiện tất cả các biến môi trường
+##### Input truyền từ terminal
+  - $read [VAR1] [VAR2]
+    - -p '[STRING]' để hiện dấu nhắc
+    - -s	Ẩn đi giá trị vừa nhập
+##### Input truyền từ file
+ - $while read [VAR1] [VARn]
+    do  
+    //Cac hanh dong  
+    done < [INPUT_FILE];  
+ - Với câu lệnh read,
+  - Mặc định là các ký tự space, tab, /r/n là những ksi tự phân cách. Nếu số biến đặt nhỏ hơn số từ, thì biến cuối cùng sẽ chiếm toàn bộ từ còn lại => đặt 1 biến để đọc cho cả dòng
+  - -a	Để lưu giá trị theo mảng ${a[n]}), bắt đầu từ 0
+  - -d [DELIMITER]	Để định nghĩa dấu ngăn cách giữa các từ
+    - Có thể sử dụng biến môi trường thay thế: IFS=[DELIMITER]
+##### Input cho các tiến trình con của nó
+ - $export [VAR] hoặc $export [VAR]=[VAL] (dùng cho external command)
+##### Output 
+ - Terminal : $echo [VAR]
+ - File : > [VAR]
+#### Câu lệnh rẽ nhánh
+##### If-else
+ if [[ [ĐIỀU_KIỆN] ]]  
+   then  
+   // COMMAND  
+   fi  
+ -------------------------------------------
+  if [[ [ĐIỀU_KIỆN] ]]  
+   then  
+   //COMMAND_1  
+   else  
+   //COMMAND_2  
+   fi  
+ --------------------------------------------
+   if [[ [ĐIỀU_KIỆN] ]]  
+   then  
+   //COMMAND_1  
+   elif [[ [ĐIỀU_KIỆN_1] ]] && [[ [ĐIỀU_KIỆN_2] ]]  
+   then  
+   //COMMAND_2  
+   else  
+   //COMMAND_3  
+   fi  
+ -----------------------------------------------
+ - Toán tử so sánh số học: -eq -ne -lt -gt -le -ge -o(or) -a (and)
+ - Toán tử so sánh chuỗi: = hoặc == != > <
+ - Kiểm tra tập tin: -f [FILE](là file?) -x(executatible?) -d(irectory) -e(xist) -w(ritable) -r(eadable) -s(size >0 ?) [F1] -ef [F2] (file f1 f2 là một)
+*Sử dụng [[ [ĐIỀU_KIỆN] ]] thay vì [ [ĐIỀU_KIỆN] ] hoặc ( [ĐIỀU_KIỆN] ) để thực hiện được các kết quả mong muốn.*
+##### Case
+case [VAR] in  
+ [VAL1] )  
+ //COMAMND_1  
+ ;;  
+ [VAL2] | [VAL3] | [VAL4] )  
+ //COMMAND_2  
+ ;;  
+ * ) //default value  
+ //COMMAND_3  
+ ;;  
+esac //Viet nguoc cua case :)
+#### VÒng lặp
+##### For loop
+ for i in 1 2 3 4 5  
+ do  
+ //[COMMAND]  
+ done  
+ - Trong đó, câu lệnh for có thể thay thế như sau
+  - for i in {1..5}
+  - for i in {0..10..2}	Bước nhảy 2 đơn vị
+  - for (( c=1; c<=5; c++ ))	Giống cấu trúc phổ biến, nhưng mà có hai ngoặc đơn
+  - for i in $( ls )	Chạy giá trị trên mảng $ls
+##### While do
+ - While sẽ thực hiện vòng lặp chừng nào điều kiện đó còn đúng
+ while [[ [ĐIỀU_KIỆN] ]]  
+ do  
+ //[COMMAND]  
+ done  
+##### Until
+ - Until sẽ thực hiện vòng lặp chừng nào điều kiện đó còn sai
+ until [[ [ĐIỀU_KIỆN] ]]  
+ do  
+ //[COMMAND]  
+ done  
+ 
 ### 2.2 Cho danh sách các package : wget, curl, mtr , httpd. Viết bash script liệt kê các package nằm trong danh sách đã sẵn trên hệ thống , sau đó cài đặt các package chưa được cài đặt 
 ## 3. Cài đặt các dịch vụ trên Centos  
 ### 3.1 Cài đặt Nginx WebServer, Apache Webserver
