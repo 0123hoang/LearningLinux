@@ -417,7 +417,7 @@ Chứa thông tin của các thiết bị, tiến trình đã thực hiện ng�
    fi  
  -----------------------------------------------
  - Toán tử so sánh số học: -eq -ne -lt -gt -le -ge -o(or) -a (and)
- - Toán tử so sánh chuỗi: = hoặc == != > <
+ - Toán tử so sánh chuỗi: = hoặc == != \> \< -n(if not empty)
  - Kiểm tra tập tin: -f [FILE](là file?) -x(executatible?) -d(irectory) -e(xist) -w(ritable) -r(eadable) -s(size >0 ?) [F1] -ef [F2] (file f1 f2 là một)
 *Sử dụng [[ [ĐIỀU_KIỆN] ]] thay vì [ [ĐIỀU_KIỆN] ] hoặc ( [ĐIỀU_KIỆN] ) để thực hiện được các kết quả mong muốn.*
 ##### Case
@@ -455,13 +455,168 @@ esac //Viet nguoc cua case :)
  do  
  //[COMMAND]  
  done  
+##### String
+ - Toán tử so sánh chuỗi: = hoặc == != \> \< -n(if not empty)
+ - Độ dài xâu: expr length $[STRING]
+ - Tìm độ dài khớp với S2 trong S1 (đếm từ 1) : expr match "$S2" 'S1' hoặc expr "$S2" : '$s1' ($s1 có thể là partern)
+ - Tìm vị trí khớp đầu tiên của S2 trong S1 (đếm từ 1): expr index "$S2" S1
+ - Hiện xâu bắt đầu từ vị trí(đếm từ 0) ${S2:[INDEX]:[LENGTH]} (đây là hiển thị xâu mới, không phải cắt trực tiếp)
+ - Tạo ra string con : expr substr $S2 [INDEX] [NUMBER]
+*https://tldp.org/LDP/abs/html/string-manipulation.html*
+##### Array
+###### Tạo array mới
+  - declare -a [ARRAY]
+  - [ARRAY] = (VAL1 VAL2 VALn)
+  - [ARRAY[0]] = VAL1 ; ARRAY[1]=VAL2
+###### In ra giá trị array
+  - for i in "${my_array[@]}"; do echo "$i"; done	Với @, mối giá trị $i là 1 phần từ của mảng
+  - for i in "${my_array[*]}"; do echo "$i"; done	Với *, $i đầu tiên của vòng lặp là toàn bộ các phần tử cảu mảng
+###### In ra giá trị index 
+ - (đếm từ 0): for key in "${!my_array[@]}"; do echo "$key"; done	Sử dụng ! trước my_array
+###### Lấy ra kích thước mảng
+ - echo "the array contains ${#my_array[@]}	Sử dụng # và @
+###### Thêm phần tử vào mảng
+ - Thêm vào cuối	my_array+=(VAR1 VAR2)
+ - Thêm vào vị trí cụ thể	my_array+=( [index]=VAR )
+###### Xóa phần tử khỏi mảng
+ - unset my_array[INDEX] (mất luôn cả index đó)
  
-### 2.2 Cho danh sách các package : wget, curl, mtr , httpd. Viết bash script liệt kê các package nằm trong danh sách đã sẵn trên hệ thống , sau đó cài đặt các package chưa được cài đặt 
+### 2.2 Cho danh sách các package : wget, curl, mtr , httpd. Viết bash script liệt kê các package nằm trong danh sách đã sẵn trên hệ thống , sau đó cài đặt các package chưa được cài đặt
+##### Ý tưởng
+ - Kiểm tra package đã được cài đặt hay chưa: Có nhiều cách để kiểm tra, nhưng cách này đầu ra khá ngắn gọn: $dpkg -V [package]
+ - Nếu chưa được cài đặt thì cài đặt: sudo apt install [package]
+##### Xây dựng
+ - Dòng đầu tiên khai báo bash: #!bin/bash
+ - Khai báo mảng cho các package cần được kiểm tra: package_array = (wget curl mtr httpd)
+ - Tạo một vòng lặp chạy trên mảng đó với biến $i: for i in ${package_array[@]} do //[COMMAND] done
+ - Mỗi vòng lặp ta kiểm tra xem package đó đã được cài đặt hay chưa với câu lệnh dpkg -V $i
+  - Trả về là 1 string: nếu đã cài đặt thì là xâu rỗng, nếu chưa thì hiện thông báo chưa được cài đặt
+  - check_install = echo "dpkg -V $i"
+ - Nếu chưa được cài đặt thì cài đặt, không thì không làm gì: if [[ -n $check_install ]] then yum install $i -y fi
+###### Hoàn thiện
+#!bin/bash  
+package_array = (wget curl mtr httpd)  
+for i in ${package_array[@]} ;do   
+ - check_install =$(dpkg -V $i)  
+ - if [ -n $check_install ] ;then   
+  - yum install $i -y   
+ - fi  
+done  
+###### Thực thi
+ - Lưu lại với tên check_package.sh, thay đổi quyền file là 755
+ - Chạy script với lệnh sudo bash check_package.sh >log 2>errorlog
+###### Đánh giá kết quả
+ - File log ghi lại log cài đặt và file error log giúp gỡ lỗi file bash và các lỗi khác.
+ - Trên Debian/Ubuntu nếu sử dụng câu lệnh cài đặt apt-get install [PACKAGE], thì httpd là gói con  trong gói phần mềm khác.
 ## 3. Cài đặt các dịch vụ trên Centos  
 ### 3.1 Cài đặt Nginx WebServer, Apache Webserver
+#### Cài đặt Nginx WebServer
+ - Cập nhật: yum update -y
+ - Tạo repo cho ngĩn vi /etc/yum.repos.d/nginx.repo
+ - Dán nội dung dưới đây vào
+[nginx-stable]  
+name=nginx stable repo  
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/  
+gpgcheck=  
+enabled=1
+ - Cài đặt nginx: yum install nginx -y
+ - Khởi động nginx: systemctl enable nginx ; systemctl start nginx
+ - Truy cập qua website là địa chỉ máy tính đó
+*https://blog.hostvn.net/chia-se/huong-dan-cai-dat-nginx-tren-centos-7.html#25_Buoc_5_Cau_hinh_Firewalld_Neu_co*
+#### Cài đặt Apache WebServer
+ - Cập nhật: yum update -y
+ - Cài đặt apache: yum install httpd -y
+ - Khởi động apache: systemctl enable httpd ; systemctl start httpd
 ### 3.2 Tìm hiểu Database, các loại database, hệ quản trị sơ sở dữ liệu
+#### Khái niệm
+ - Database (cơ sở dữ liệu) là một tập hợp những data (dữ liệu) có liên quan với nhau . Database được duy trì dưới dạng một tập hợp các tập tin trong hệ điều hành hay được lưu trữ trong các hệ quản trị cơ sở dữ liệu. 
+#### Phân loại
+ - Phân loại theo mục đích
+  - Database dạng file:Đây là dạng dữ liệu được lưu trữ dưới dạng các file. Database dạng file thường được sử dụng nhất là *.mdb Foxpro,một số định dạng file khác làtext, ascii, *.dbf.
+  - Database quan hệ:Đây là dạng dữ liệu (thực thể) khác nhau được lưu trữ trong các bảng dữ liệu. Giữa các thực thể này có mối liên hệ với nhau gọi là các quan hệ với nhau. Các hệ quản trị hỗ trợ database quan hệ nổi tiếng có thể kể đến: MS SQL server, Oracle, MySQL…
+  - Database hướng đối tượng: Đây là dạng dữ liệu cũng được lưu trữ trong các bảng dữ liệu. Điều khác biệt là các bảng có bổ sung thêm các tính năng hướng đối tượng như lưu trữ thêm các hành vi, nhằm thể hiện hành vi của đối tượng. Mỗi bảng xem như một lớp dữ liệu. Một dòng dữ liệu trong bảng là một đối tượng. Các hệ quản trị có hỗ trợ database hướng đối tượng như: MS SQL server, Oracle, Postgres SQL
+  - Database bán cấu trúc:Đây là dạng dữ liệu được lưu dưới định dạng XML, các thông tin mô tả dữ liệu, đối tượng được trình bày trong các thẻ tag. Với ưu điểm lưu trữ được hầu hết các loại dữ liệu khác nhau, database bán cấu trúc là hướng mới trong nghiên cứu và ứng dụng về cơ sở dữ liệu.
+ - Phân loại theo hệ diều hành
+  - Database sử dụng hệ điều hành Linux:MySQL, Mariadb
+  - Database sử dụng hệ điều hành Windows: SQL Server – MSSQL
+#### hệ quản trị sơ sở dữ liệu
+ - Hệ quản lý cơ sở dữ liệu (Database Management System - DBMS) là phần mềm tương tác với người dùng cuối, ứng dụng và chính cơ sở dữ liệu để thu thập và phân tích dữ liệu. Phần mềm DBMS bao gồm các tiện ích cốt lõi được cung cấp để quản trị cơ sở dữ liệu. Tổng cộng của cơ sở dữ liệu, DBMS và các ứng dụng liên quan có thể được gọi là "hệ thống cơ sở dữ liệu". Thông thường thuật ngữ "cơ sở dữ liệu" cũng được sử dụng để nói đến bất kỳ DBMS, hệ thống cơ sở dữ liệu hoặc ứng dụng nào được liên kết với cơ sở dữ liệu.
 ### 3.3 Tìm hiểu cấu hình enable log mysql
+ - Với mysql < 5.1.29, để bật query log, sửa dòng sau ở /etc/my.cnf ở phần [mysqld]:
+  - log   = /path/to/query.log  #works for mysql < 5.1.29
+  - Enable từ MySQL console: SET general_log = 1;
+ - Với mysqld > 5.1.29, để bật query log:
+  - general_log_file = /path/to/query.log
+  - general_log =1
+  - SET global general_log=1
+  - SET global log_output = 'file';
 ### 3.4 Cài đặt MYSQL Server, MariaDB Server, PHPmyadmin. Các command phổ biến làm việc với MYSQL Database, người dùng và phân quyền. So sánh Mysql và MariaDB
+#### MySQL
+ - Tải về repo mysql: sudo wget https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+ - Cài đặt repo đó: sudo rpm -Uvh mysql80-community-release-el7-3.noarch.rpm
+ - Tải về mysql: yum install mysql-server
+#### MariaDB Server
+ - wget https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+ - chmod +x mariadb_repo_setup
+ - sudo ./mariadb_repo_setup
+ - sudo yum install MariaDB-server
+#### PHPmyadmin
+ - Với PHPmyadmin, ta có thể sử dụng mySQL và mariaDB trên giao diện.
+ - sudo yum install epel-release
+ - yum install http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+ - yum install phpmyadmin
+ - vi  /etc/httpd/conf.d/phpmyadmin.conf để thay đổi tại block <Directory /usr/share/phpMyAdmin/> </Directory>
+  - # Require ip 127.0.0.1
+  - # Require ip ::1
+  - Require all granted
+ - Copy file /etc/phpMyAdmin/config.sample.inc.php thành config.inc.php
+ - Sửa file config.inc.php : thay tất cả các giá trị cookie thành http
+ - Truy cập bằng web http://IP/phpmyadmin
+ - Nếu bị lỗi truy cập Forbidden thì yum install php
+#### Một số MySQL command
+##### Tài khoản
+ - [mysql dir]/bin/mysql -h hostname -u root -p	Đăng nhập
+ - SET PASSWORD FOR 'user'@'hostname' = PASSWORD('passwordhere');	Đổi mk
+ - SELECT User,Host FROM mysql.user;	Xem tất cả tài khoản
+ - CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';	Tạo tài khoản.
+  - GRANT ALL PRIVILEGES ON * . * TO 'newuser'@'localhost';	Trao quyền truy cập mọi dữ liệu của db
+ - https://stackoverflow.com/questions/33510184/how-to-change-the-mysql-root-account-password-on-centos7/34207996#34207996
+ dùng để thay đổi mật khẩu root lần đầu tiên.
+##### Database, table
+ - create database [db name];
+ - show databases;
+ - use [db name];
+ - show tables;
+ - describe [table name];
+ - drop database [db name];
+ - drop table [table name]
+##### Query
+ - CREATE TABLE [table name] ( [name] [type]([byte]) [OPTION], );
+*[OPTION] có thể là primary key, unique, not null...*
+ - INSERT INTO [table name] (columns,) VALUES (values,);
+ - UPDATE [table name] set [VAL_1]=[VAL 2],
+ - ALTER table [table name] [OPTION] ;	Thay đổi một thuộc tính của cột.
+ -....
+##### Phân quyền
+ - SHOW GRANTS [FOR 'bloguser'@'localhost'];	Xem phân quyền người dùng;
+ - GRANT [permission] ON [database].[table] TO 'user'@'localhost';
+
+|permisstion| Loại|
+|---|---|
+|ALL| cho hết|
+|CREATE||
+|DELETE||
+|DROP||
+|EXECUTE|Cho phép thực hiện function hoặc procedure trên global hoặc database|
+|GRANT OPTION| Cho phép người dùng thêm hoặc xóa quyền người dùng khác|
+|INSERT||
+|SELECT||
+|SHOW DATABASE||
+|UPDATE||
+*Sau đó reset lại bằng FLUSH PRIVILEGES;*
+*https://dev.mysql.com/doc/refman/5.7/en/privileges-provided.html*
+ - Để thu hồi quyền hạn, ta sử dụng REVOKE
+  - REVOKE [perrmission] on [db].[table] from '[user]'@'[host]'
 ### 3.5 Cài đặt NTP ( Network Time Protocol )
 ### 3.6 Cài đặt, cấu hình Yum Local Repository 
 ## 4. Kiểm tra hiệu năng Network
