@@ -550,6 +550,7 @@ enabled=1
   - general_log =1
   - SET global general_log=1
   - SET global log_output = 'file';
+*Nhớ phân quyền ghi cho file và thư mục cha của nó.
 ### 3.4 Cài đặt MYSQL Server, MariaDB Server, PHPmyadmin. Các command phổ biến làm việc với MYSQL Database, người dùng và phân quyền. So sánh Mysql và MariaDB
 #### MySQL
  - Tải về repo mysql: sudo wget https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
@@ -617,6 +618,10 @@ enabled=1
 *https://dev.mysql.com/doc/refman/5.7/en/privileges-provided.html*
  - Để thu hồi quyền hạn, ta sử dụng REVOKE
   - REVOKE [perrmission] on [db].[table] from '[user]'@'[host]'
+#### So sánh MySQL và MariaDB
+ - MariaDB được tách ra thành 1 nhánh của MySQL
+ - Cả hai có cấu trúc tương tự nhau, có thể chuyển đổi qua lại mà ko gây hỏng hóc dữ liệu.
+ - MySQL được phát triển bởi Oracle, còn MariaDB là mã nguồn mở
 ### 3.5 Cài đặt NTP ( Network Time Protocol )
 ### 3.6 Cài đặt, cấu hình Yum Local Repository 
 ## 4. Kiểm tra hiệu năng Network
@@ -628,5 +633,57 @@ enabled=1
 ### 4.6 mtr, tracroute
 ## 5. Cài đặt Wordpress  
 ### 5.1 Node 1 : Cài đặt Wordpress thủ công sử dụng MYSQL 5.7 và PHP 7.1, viết script cài đặt Wordpress sử dụng  MYSQL 5.7 và PHP 7.1
+#### Yêu cầu 
+ - Máy đã cài đặt sẵn MySQL 5.7 và PHP 7.1
+#### Tải và cài Wordpress thủ công
+ - $wget https://wordpress.org/latest.tar.gz	Tải về wordpress
+ - $tar xzvf latest.tar.gz	Giải nén
+ - $mv wordpress/* /var/www/html/	Di chuyển sang thư mục html
+ - $rm latest.tar.gz	Xóa file
+ - $ cd /var/www/html/wordpress
+ - $ mv wp-config-sample.php wp-config.php
+ - $ vi wp-config.php	Sửa file với nội dung sau
+ ![image](https://user-images.githubusercontent.com/43545058/88134553-207f2280-cc0f-11ea-8666-f21f5d0062ff.png)
+ - Sau đó truy cập sử dụng đường dẫn IP/wordpress (trước đó dùng php là IP/phpmyadmin), sau đó cài thêm một số tùy chọn cho trang wordpress của mình.
+#### Tải và cài Wordpress tự động
+ - Tải về wordpress: wget https://wordpress.org/latest.tar.gz
+ - Giải nén: tar xzvf latest.tar.gz
+ - Đổi tên: mv wordpress/wp-config-sample.php wordpress/wp-config.php
+##### Thay đổi nội dung file wp-config.php:
+###### 1. Đọc dữ liệu từ terminal
+  - $read -p "database: " database
+  - $read -p "username: " username
+  - $read -ps "password: " password
+  - $read -p "hostname: " hostname
+##### 2. Sửa đổi trên file wp-config.php
+  - file-config="/var/www/html/wordpress/wp-config.php"
+  - sed -i s/database_name_here/$database/1 $file-config
+  - sed  -i s/username_here/$username/1 $file-config
+  - sed -i s/password_here/$password/1 $file-config
+  - sed -i s/localhost\'/$hostname\'/1 $file-config
+  
+ - Di chuyển sang thư mục mới mv wordpress/* /var/www/html/
+ - Xóa file: rm latest.tar.gz
+ - Xong rồi truy cập qua địa chỉ trình duyệt IP/wordpress
+##### Script hoàn chỉnh
+#!bin/bash
+## download wordpress tar file
+wget https://wordpress.org/latest.tar.gz  
+tar xzvf latest.tar.gz  
+mv wordpress/wp-config-sample.php wordpress/wp-config.php  
+######################################### read variable
+read -p "database: " database  
+read -p "username: " username  
+read -ps "password: " password  
+echo "\n"  
+read -p "hostname: " hostname  
+############################################ edit config file
+file-config="/var/www/html/wordpress/wp-config.php"  
+sed -i s/database_name_here/$database/1 $file_config  
+sed  -i s/username_here/$username/1 $file_config  
+sed -i s/password_here/$password/1 $file_config  
+sed -i s/localhost\'/$hostname\'/1 $file_config  
+############################################# clean things
+rm latest.tar.gz
 ### 5.2 Node 2 : Cài đặt MariaDB 10.1. Chuyển database từ node 1 sang node 2. Đảm bảo dữ liệu nguyên vẹn
 ### 5.3 Node 1 : Cập nhật cấu hình database kết nối đến node 2, đảm bảo Website hoạt động bình thường ( không mất mát dữ liệu )
