@@ -582,7 +582,7 @@ enabled=1
  - CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';	Tạo tài khoản.
   - GRANT ALL PRIVILEGES ON * . * TO 'newuser'@'localhost';	Trao quyền truy cập mọi dữ liệu của db
  - https://stackoverflow.com/questions/33510184/how-to-change-the-mysql-root-account-password-on-centos7/34207996#34207996
- dùng để thay đổi mật khẩu root lần đầu tiên.
+ dùng để thay đổi mật khẩu root lần đầu tiên.(/var/log/mysqld.log)
 ##### Database, table
  - create database [db name];
  - show databases;
@@ -623,7 +623,23 @@ enabled=1
  - Cả hai có cấu trúc tương tự nhau, có thể chuyển đổi qua lại mà ko gây hỏng hóc dữ liệu.
  - MySQL được phát triển bởi Oracle, còn MariaDB là mã nguồn mở
 ### 3.5 Cài đặt NTP ( Network Time Protocol )
-### 3.6 Cài đặt, cấu hình Yum Local Repository 
+NTP là một giao thức giúp đồng bộ thời gian giữa các máy tính và thiết bị với nhau, giúp cho việc định giờ và truyền tin một cách đúng đắn.
+ - Tải ntp deamon: yum install ntp -y
+#### Cấu hình file config /etc/ntp.conf :
+ - Thêm các server NTP để đồng bộ, tìm ở *https://www.pool.ntp.org/en/* (Chọn server gần nhất) và comment các server mặc định đi
+ ![image](https://user-images.githubusercontent.com/43545058/88375809-7649fb00-cdc6-11ea-8477-74ac3191f92d.png)  
+ - Thêm một dải IP cho phép làm NTP client
+ ![image](https://user-images.githubusercontent.com/43545058/88375869-8feb4280-cdc6-11ea-90f2-50454b09431a.png)
+  - nomodify và notrap nghĩa là máy client ko có quyền thay đổi ntp server và không cho phép client cũng cài và phân phát ntp server.
+ - Thêm dòng log file
+  - logfile /vả/log/ntp.log
+ - Lưu lại và đóng file config, sau đó start và enable ntpd.
+ - Kiểm tra với ntpq -p và date.
+ *Nhớ kiểm tra lại timezone với timezonectl*
+### 3.6 Cài đặt, cấu hình Yum Local Repository
+Repo là một nơi để lưu trữ các gói công cụ. Tạo một local repo để ta không phải phụ thuộc vào các repo công cộng trên mạng.  
+ - mkdir [DIR]	Tạo một folder mới
+ - $yum install createrepo	Cài đặt gói createrepo 
 ## 4. Kiểm tra hiệu năng Network
 ### 4.1 Tìm hiểu các command phổ triển trong netstat và ss
 ### 4.2 Cài đặt, tìm hiểu các command trong nuttcp
@@ -686,4 +702,26 @@ sed -i s/localhost\'/$hostname\'/1 $file_config
 ############################################# clean things
 rm latest.tar.gz
 ### 5.2 Node 2 : Cài đặt MariaDB 10.1. Chuyển database từ node 1 sang node 2. Đảm bảo dữ liệu nguyên vẹn
+#### 1. Cho phép truy cập MariaDB từ xa
+ - MariaDB có file cấu hình mặc định ở /etc/my.cnf, ta chỉnh sửa để có thể truy cập db từ xa
+[mysqld=]
+bind-address=[IP máy]  
+port=[PORT]  
+ - Mặc định là 3306, không thêm dòng đấy cũng được  
+ - Restart lại MariaDB (systemctl restart mysqld)
+ - Đăng nhập MariaDB, thêm host từ xa cho phép đăng nhập:
+  - VD: mysql>GRANT ALL ON [db].[table] to 'user'@'remote_host' IDENTIFIED BY 'password';
+*https://www.cyberciti.biz/tips/how-do-i-enable-remote-access-to-mysql-database-server.html*
+
+ - Thực hiện đăng nhập từ xa: mysql -u [username] -p -h [IP_server]
+#### 2. Di chuyển database từ xa từ MySQL sang MariaDB
+##### Trên máy MySQl
+ - Tạo file 1 db: $mysqldump -u [user] -p [db_name] > [path_to_db_name'].sql
+  - hoặc toàn bộ tất cả db: $mysqldump -u [user] -p --all-databases > all_databases.sql
+##### Trên máy MariaDB
+ - Tạo một db mới [db_new]. Có thể thực hiện trực tiếp trên máy hoặc qua mạng. (Xem ở trên)
+ - Import server MariaDB qua mạng: $ mysql -u [user] -p -h [IP_MariaDB] [db_new] < [path_to_db_name'].sql
 ### 5.3 Node 1 : Cập nhật cấu hình database kết nối đến node 2, đảm bảo Website hoạt động bình thường ( không mất mát dữ liệu )
+ - Sửa file config word press thôi:$ vi /var/www/html/wordpress/wp-config-php
+ - Thay đổi các thông số database, host,.. sao cho phù hợp với server node 2
+ - $systemctl restart httpd
