@@ -637,16 +637,130 @@ NTP là một giao thức giúp đồng bộ thời gian giữa các máy tính 
  - Kiểm tra với ntpq -p và date.
  *Nhớ kiểm tra lại timezone với timezonectl*
 ### 3.6 Cài đặt, cấu hình Yum Local Repository
-Repo là một nơi để lưu trữ các gói công cụ. Tạo một local repo để ta không phải phụ thuộc vào các repo công cộng trên mạng.  
- - mkdir [DIR]	Tạo một folder mới
+Repo là một nơi để lưu trữ các gói công cụ. Tạo một local repo để ta không phải phụ thuộc vào các repo công cộng trên mạng.
+#### Cài đặt yêu cầu
+ - yum install httpd	Sử dụng http để vận chuyển package
+ - yum install vsftpd	Sử dụng ftp để vận chuyển package
  - $yum install createrepo	Cài đặt gói createrepo 
+ -  yum install yum-utils	Công cụ để quản lý repo
+  - Sau đó enable httpd và vsftpd lên
+#### Tạo thư mục lưu trữ
+ - mkdir /var/www/html/repo/{base,centosplus,extras,updates}	Tạo một folder mới để chứa repo sử dụng http
+ - mkdir -p /var/ftp/repos	Tạo folder cho thư mục FTP
+#### Tải về các package
+ - Tải về từ mạng
+  - sudo reposync -g -l -d -m --repoid=base --newest-only --download-metadata --download_path=/var/www/html/repos/
+  - sudo reposync -g -l -d -m --repoid=centosplus --newest-only --download-metadata --download_path=/var/www/html/repos/
+  - sudo reposync -g -l -d -m --repoid=extras --newest-only --download-metadata --download_path=/var/www/html/repos/
+  - sudo reposync -g -l -d -m --repoid=updates --newest-only --download-metadata --download_path=/var/www/html/repos/ 
+#### Cài đặt
+ - createrepo /var/www/html	Khởi tạo repo
+ - createrepo /var/ftp	Khởi tạo repo
+#### Thêm repo khi tìm kiếm
+ - Thêm config repo file tại /etc/yum.repo.d; Tạo repo file mới là remote.repo và thêm dòng sau
+[remote]  
+name=[NAME]  
+baseurl=[URL]  
+enable=1  
+gpgcheck=0  
+*[URL] có thể là http hoặc ftp*
+ - Sau đó ta đánh lệnh yum clean all để xóa cache 
+ - Kiểm tra	yum repolist
+ - Thử yum install một package nào đó
 ## 4. Kiểm tra hiệu năng Network
 ### 4.1 Tìm hiểu các command phổ triển trong netstat và ss
+#### $netstat
+Lệnh này dùng để quản lý và theo dõi,giám sát hệ thống mạng trên Linux  
+ - netstat [OPTION]
+  - -4/-6
+  - -t --tcp/ -u --udp
+  - -a --all
+  - -l --listening
+  - -n --numberic	Hiển thị địa chỉ số thay vì tên phân giải
+  - -v --verbose
+  - -r --route
+  - -e --extend
+  - -s --statistic
+  - -M --masquerade
+*manual của netstat nói là nên sử dụng ss thay thế cho netstats => Không *
+#### $ss
+Viết tắt của socket statistic, ss có chức năng tương tự với netstat nhưng giúp hiển thị nhiều thông tin hơn.  
+ - $ss [OPTION]
+  - -n --umberic	HIển thị địa chỉ số thay vì phân giải tên
+  - -r	Ngược lại với -n
+  - -a --all
+  - -4/6
+  - -l --listening
+  - -o --option	Hiển thị thời gian của thông tin đó (chắc thời gian của gói tin)
+  - -e --extend	
+  - -s --summary
+  - -t --tcp/ -u --udp
+  - -A --quer=[QUERY], --socket=[QUERY]/
+  - --state [STATE]	Các trạng thái của tcp
 ### 4.2 Cài đặt, tìm hiểu các command trong nuttcp
+nuttcp là một công cụ để đo hiệu năng network.  
+ - $nuttcp [OPTION]
+  - -S	Khởi động nuttcp server (có thể thêm tùy chọn -P [PORT] lắng nghe khác 5000)
+  - Để tắt nuttcp server, kill nó đi
+ - $nuttcp [server-host]	Lệnh cơ bản
+  - Trong đó, %TX và %RX là năng lực cpu sử dụng cho gửi và nhận data.
+  - -w[SIZE]	Đặt window size [K,M]
+  - -u	Dùng UDP thay vì mặc định là TCP
+  - -i	Hiển thị từng giây một (mặc định là 10s)
+  - -Ri[SIZE]	Đặt giá trị tối đa gửi đi
+*https://build.opensuse.org/package/view_file/network:utilities/nuttcp/examples.txt*
+*nuttcp phục vụ khá tốt nhu cầu cần kiểm tra hiệu năng network đơn giản*
 ### 4.3 Cài đặt, tìm hiểu các command iper3
+iperf3 là một công cụ để đo hiệu năng network.  
+ - $iperf3 [OPTION]
+  - -s	Khởi tạo server (Có thể thêm -p [PORT] để thay thế port để lắng nghe 5201 mặc định)
+  - -s -D	Khởi tạo deamon mode; Dừng chắc kill nó đi 
+ - $iperf3 -c [server-host]	Lệnh cơ bản kiểm tra bandwidth
+  - -f [K,M,G]	Hiển thị kiểu gì
+  - -w	[size]	Thay đổi window size
+  - -V --verbose
+  - --logfile [file]	Gửi output ra log file
+  - -u sử dụng UDP thay vì TCP
+  - -b/--bandwidth [size]	Đặt bandwidth
+  - -i[n]	Đặt khoảng thời gian cho mỗi lần hiển thị mới, 1 là mặc định, 0 là tắt
+  - -t/--time [n]	Đặt khoảng thời gian vận chuyển data
+  - -P/--parallel [n]	Số lượng user gủi đồng thời
+  - -R --reverse	chiều data ngược lại (server gửi, client nhận)
+  - -4/-6
+  - -S --tos [n]	đặt type of service IP (số 4 bit)
+  - -L --flowlabel [n] đặt flowlabel với IPv6 
+*iperl3 có thêm nhiều chức năng hơn nuttcp, giúp kiểm tra, gỡ lỗi nhiều hơn, tuy nhiên có vẻ nuttcp test nhanh và ổn định hơn iperl3*
 ### 4.4 Cài đặt, tìm hiểu các command trong bwctl
-### 4.5 So sách 3 công cụ trên
+bwctl là câu lệnh có thể đo bandwidth, delay, jitter, lose rate... giống 2 câu lệnh trrrn.  
+ - $bwctl [OPTION] -c [receive-host] -s [send-host]
+ - $bwping ...
+ - $bwtraceroute ...
+  - -t Thời gian
+  - -f [m,g,k]
+  - -N [n]	Số lượng packets
+  - -i [n]
+*bwctl được đánh dấu là lỗi thời kể từ tháng 4/2017 vì một số lí do bảo mật*
 ### 4.6 mtr, tracroute
+#### traceroute
+traceroute là câu lệnh dùng để lần vết gói tin truyền đi.  
+ - $traceroute [host]
+  - -4/-6
+  - -I/--icmp	DÙng ICMP ECHO
+  - -T/--tcp	DÙng TCP SYN
+  - -m/--max-ttl [n]
+  - -n	Không phân giải địa chỉ
+  - -p [port]	Đặt port chỉ định
+  - -s/--source [address]	Sử dụng address chỉ định
+  - --mtu	Kiểm tra mtu qua mỗi n
+#### mtr
+mtr là một công cụ dùng để hiển thị trace route; mtr sử dụng mã nguồn của cả $ping và $traceroute.  
+ - $mtr [OPTION] [host-name]
+  - -4/-6
+  - -u/--udp -T/--tcp	Sử dụng udp/tcp thay vì icmp mặc định
+  - -I/--interface [name]	Sử dụng interface chỉ định
+  - -a/--address [address]	Sử dụng address chỉ định
+  - -m/--max-ttl [number]	Đặt max ttl
+*Xem thêm một số tùy chọn cho gói tin, cho output ở mtr --help*
 ## 5. Cài đặt Wordpress  
 ### 5.1 Node 1 : Cài đặt Wordpress thủ công sử dụng MYSQL 5.7 và PHP 7.1, viết script cài đặt Wordpress sử dụng  MYSQL 5.7 và PHP 7.1
 #### Yêu cầu 

@@ -153,6 +153,7 @@ Trên cửa sổ dòngdòng lệnh có một số cách để điều hướng i
  - $timedatectl [OPTION] [COMMAND]	Dùng để thay đổi hoặc xem thời gian
   - $timedatectl status	Câu lệnh cơ bản
   - $timedatectl set-timezone [ZONE], set-ntp [BOOL], set-time [TIME]	Đổi thuộc tính tương ứng
+    - list-timezones để tìm timezone
  - $sleep	Làm trễ một khoảng thời gian
   - $sleep [NUMBER][SUFFIX]	Trễ môt khoảng [NUMBER] giây (mặc định). Với [SUFFIX] có thể là s,m,h,d tương ứng
  - $tar [OPTIONS] [FILENAME]	Dùng để nén và giải nén file
