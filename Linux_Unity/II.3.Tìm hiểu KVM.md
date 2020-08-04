@@ -243,7 +243,10 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
 *https://linux.die.net/man/1/virt-install*
 ### 11.Các tính năng của KVM đối với máy ảo: Tạo - xóa - sửa, sao lưu, clone, snapshot... Lab kiểm chứng các tính năng, ví dụ snapshot trên máy ảo qcow2.
 #### 11.1 Tạo máy ảo
+##### CLI
 *Xem lại ở 8.2*
+##### virt-manager
+ - Chuột trái vào File -> New Virtual Machine. Tại popup cấu hình, ta lần lượt chọn image và cách boot -> Chọn lượng RAM, CPU -> Chọn storage (tạo mới hoặc sử dụng lại) -> Chọn tên VM  và chọn network (tùy chọn). Sau đó ấn Finish.
 #### 11.2 Xóa
 ##### CLI
  - $virsh undefine [domain-name]	Nếu host đang tắt, thì xóa hoàn toàn cấu hình, nếu host đang bật thì chuyển thành domain tạm thời (nếu reboot sẽ mất cấu hình).
@@ -252,16 +255,41 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
   - --remove-all-storage	Các storage cũng sẽ được xóa
   - --wipe-storage	Vừa xóa storage vừa tẩy nó đi luôn
 *https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/virtualization_deployment_and_administration_guide/sect-virsh-delete*
- - 
+##### virt-manager
+ - Chuột phải vào VM -> Delete. (Cần test lại xem).
 #### 11.3 Sửa
 ##### RAM
+###### CLI
+ - $virsh setmem [domain] [size][G,M] [OPTION]	Thay đổi RAM của guest.
+  - --config	Áp dụng cho lần boot tiếp theo
+  - --live	Áp dụng cho domain đang chạy
+  - --current	Áp dụng domain hiện thời
+*Có thể cần phải setmaxmem cao hơn setmem*
+*Không sử dụng thêm/bớt +/- được*
+###### virt-manager
+*Không có*
 ##### Storage
+*Phần này chỉ đề cập đến thay đổi dung lượng storage guest, còn đối với pool và volume bàn đến sau*
+###### CLI
+
+###### virt-manager
 ##### Driver
 #### 11.4 Sao lưu
 #### 11.5 Clone
 #### 11.6 Snapshot
 ### 12.Phân tích đường đi gói tin với 3 chế độ card mạng, nó đi qua các point nào ? (vẽ layout)
+#### 12.1 Nat mode
+![image](https://user-images.githubusercontent.com/43545058/89253416-d3f00a00-d646-11ea-89c8-4570b501aa14.png)
+ - Mạng ảo sử dụng mặc định là mạng NAT. Ở trong mode này, các guest có thể giao tiếp với nhau qua một mạng riêng, và giao tiếp với mạng Internet qua cơ chế NAT tại IP của host
+#### 12.2 Routed mode
+![image](https://user-images.githubusercontent.com/43545058/89253660-6bedf380-d647-11ea-82a1-1a7df863c458.png)
+ - Mạng ảo sử dụng chế độ này có tác dụng tương tự như bridge. Các guest có IP cùng nằm với mạng của host IP bên ngoài. Các guest gửi gói tin qua host, host đóng vai trò như một router, nhận nhiệm vụ chuyển tiếp gói tin.
+#### 12.3 Isolated mode
+![image](https://user-images.githubusercontent.com/43545058/89253983-46adb500-d648-11ea-815a-5cc0497fd275.png)
+ - Mạng sử dụng chế độ này được cô lập bởi mạng bên ngoài. Có tác dụng kết nối chỉ trong các guest và host kết nối với mạng ảo
 ### 13.Làm rõ đường đi gói tin khi sử dụng chế độ NAT. Không cần tạo dải bridge thì máy ảo có ra ngoài được không, nó sẽ đi qua đâu, đâu là thành phần cấp dhcp cho máy ảo.
+![image](https://user-images.githubusercontent.com/43545058/89254475-61ccf480-d649-11ea-8182-b9b1549ce048.png)
+ - Khi sử dụng chế độ NAT, máy guest sẽ được cấp IP động qua một DNS và DHCP server. Server này nằm trong vmSwitch, được libvirt sử dụng trên chương trình dnsmasq.
 ### 14.Kiểm tra switch ảo với card thật có liên quan gì đến nhau
 ### 15.Trả lời các câu hỏi máy ảo được lưu ở đâu, mỗi thư mục của máy ảo có các file như thế nào, làm rõ thông tin trong từng file.
 ### 16.Tìm hiểu về file XML của máy ảo, của network, cách tạo máy ảo, network mới bằng file xml
