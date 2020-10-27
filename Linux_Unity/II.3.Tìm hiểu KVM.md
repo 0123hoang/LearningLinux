@@ -40,6 +40,7 @@
 
  - KVM (Kernel-based virtual machine) là giải pháp ảo hóa cho hệ thống linux trên nền tảng phần cứng x86 có các module mở rộng hỗ trợ ảo hóa (Intel VT-x hoặc AMD-V).
  - KVM có ưu điểm so với các hypervisor khác là mã nguồn mở, sử dụng miễn phí, tiêu thụ tài nguyên ít và quản lý tài nguyên linh hoạt nhờ sử dụng trên các ưu điểm ủa nhân Linux.
+
 ### 5.Các thành phần trong KVM và cách hoạt động, mối quan hệ của KVM với OS là như thế nào?
 #### 5.1 Sơ lược kiến trúc KVM
   - Host: PC vật lý.
@@ -52,9 +53,26 @@
  - KVM-Qemu được quản lý bởi libvirt: libvirt là một API mã nguồn mở, là một deamon giúp dễ dàng quản lý, quản trị hơn.
  ![image](https://user-images.githubusercontent.com/43545058/88757203-b24ada80-d18f-11ea-80b3-ad6ee8ede9ab.png)
  <img src = "http://imgur.com/JevJgt7.jpg">  
+#### libvirt 
+ - Là một API giúp quản lý các quá trình ảo hóa khác nhau, được sử dụng bởi nhiều chương trình như virsh, virt-manager, Openstack... qua tiến trình ngầm libvirtd.
+ ![image](https://camo.githubusercontent.com/3a165b6b2533758afff4b5cb6d7c5e3725640646/68747470733a2f2f692e696d6775722e636f6d2f363846726e514c2e706e67)
+ - CLient khi muốn kết nối với hypervisor cụ thể qua libvirt bằng URI:
+ 'driver[+transport]://[username@][hostname][:port]/[path] [?extraparameters]'
+ qemu://xxxx/system kết nối bằng tài khoản root
+ qemu://xxxx/session kết nối bằng tài khoản thường
+ Ví dụ: Kết nối với qemu qua ssh bằng tài khoản root
+  - virsh --connect qemu+ssh://root@remoteserver.yourdomain.com/system list
+--all
+ ![image](https://camo.githubusercontent.com/ba12650d8cfb8a0ae0295779123f1b65646fd970/68747470733a2f2f692e696d6775722e636f6d2f444139564476412e706e67)
+#### Hoạt động nội bộ của libvirt.
+ - libvirt hoạt động hay bắt đầu kết nối dựa trên chế độ driver. Tại thời điểm khởi tạo, các driver được đăng ký với libvirt. Driver cơ bản là một khối được xây dựng cho libvirt để hỗ trợ libvirt xử lý các kết nối đến các hypervisor đặc biệt. Các driver được phát hiện và đăng ký tại thời điểm xử lý các kết nối.
+
+![image](https://camo.githubusercontent.com/d8accf95c1eda5e91537f8a1a825e8a34a1373cb/68747470733a2f2f692e696d6775722e636f6d2f486164514376532e706e67)
+Như hình trên, Public API sẽ được công khai ra bên ngoài. Dựa trên URI mà client cung cấp, Public API sẽ nhượng quyền triển khai cho một hay nhiều drivers. Có nhiều loại driver trong libvirt như hypervisor, interface, network, nodeDevice, nwfilter, secret, storage,..
 #### CPU trong kvm
  - Qemu là một process của host, nhờ có SeLinux nên các process khác của host không thể truy cập được vào process của Qemu.
  - Trong Qemu, KVM tạo ra các vCPU cho khác Guest, mỗi một vCPU này tương ứng với một process con của Qemu, nên được CPU của host xử sự như các process bình thường khác. 
+ - Ngoài ra còn có các process cho I/O backend.
 #### Network trong kvm
  - kvm có thể tạo một mạng riêng ảo, sử dụng mạng NAT(sermode) hoặc mạng Bridge để kết nối ra ngoài.
 #### Memory trong kvm
@@ -65,8 +83,8 @@
  - Private Bridge:
   - Chế độ này sẽ sử dụng một bridge riêng biệt để các VM giao tiếp với nhau mà không ảnh hưởng tới địa chỉ của KVM host.
   - Ta có thể tạo ra private bridge bằng cách chỉnh sửa file /etc/network/interfaces. Tại đây, bạn sẽ không cần phải comment các cấu hình của card vật lý đồng thời không cần thêm tham số bridge_ports cho bridge.
-  - Khi tạo máy ảo và kết nối tới private bridge, các máy ảo sẽ được cấp phát địa chỉ theo dải IP mà người dùng chọn. Chúng có thể giao tiếp với nhau những không đi ra được internet.
-  - Một máy ảo có thể được kết nối tới nhiều các private bridge, nhờ vậy nó có thể giao tiếp với nhau.
+  - Khi tạo máy ảo và kết nối tới private bridge, các máy ảo sẽ được cấp phát địa chỉ theo dải IP mà người dùng chọn. Chúng có thể giao tiếp với nhau nhưng không đi ra được internet.
+  - Một máy ảo có thể được kết nối tới nhiều private bridge, nhờ vậy nó có thể giao tiếp với nhau.
  - Public Bridge:
   - Chế độ này sẽ cho phép các máy ảo có cùng dải mạng vật lí với card mạng thật. Để có thể làm được điều này, bạn cần thiết lập 1 bridge và cho phép nó kết nối với cổng vật lí của thiết bị thật (eth0).
   - Sau khi đã cấu hình public bridge, khi tạo máy ảo, bạn chỉ cần chọn chế độ "Bridge br0" là các máy ảo sẽ tự động được nhận các địa chỉ ip trùng với dải địa chỉ của card vật lí.
@@ -104,8 +122,9 @@ Cơ chế cấp DHCP cho các máy ảo sẽ do Router bên ngoài đảm nhận
   - Qcow2 là một phiên bản cập nhật của định dạng qcow, nhằm để thay thế nó. Khác biệt với bản gốc là qcow2 hỗ trợ nhiều snapshots thông qua một mô hình mới, linh hoạt để lưu trữ ảnh chụp nhanh. Khi khởi tạo máy ảo mới sẽ dựa vào disk này rồi snapshot thành một máy mới
   - Qcow2 hỗ trợ copy-on-write với những tính năng đặc biệt như snapshot, mã hóa ,nén dữ liệu…
   - Copy on write (cow) Copy-on-write ( COW ), đôi khi được gọi là chia sẻ tiềm ẩn, là một kỹ thuật quản lý tài nguyên được sử dụng trong lập trình máy tính để thực hiện có hiệu quả thao tác “nhân bản” hoặc “sao chép” trên các tài nguyên có thể thay đổi. Nếu một tài nguyên được nhân đôi nhưng không bị sửa đổi, không cần thiết phải tạo một tài nguyên mới; Tài nguyên có thể được chia sẻ giữa bản sao và bản gốc. Sửa đổi vẫn phải tạo ra một bản sao, do đó kỹ thuật: các hoạt động sao chép được hoãn đến việc viết đầu tiên. Bằng cách chia sẻ tài nguyên theo cách này, có thể làm giảm đáng kể lượng tiêu thụ tài nguyên của các bản sao chưa sửa đổi.
-  - Qcow2 hỗ trợ việc tăng bộ nhớ bằng cơ chế Thin Provisioning (Máy ảo dùng bao nhiêu file có dung lượng bấy nhiêu).
+  - Qcow2 hỗ trợ việc tăng bộ nhớ bằng cơ chế Thin Provisioning (Máy ảo dùng bao nhiêu file có dung lượng bấy nhiêu),snapshot.
 *https://people.gnome.org/~markmc/qcow-image-format.html*
+*https://www.linux-kvm.org/images/9/92/Qcow2-why-not.pdf*
 ### 8.Dựng LAB và kiểm chứng thông tin.
 #### 8.1 Cài đặt yêu cầu
  - Cài trước các gói phụ trợ: yum install qemu-kvm bridge-utils virt-manager virt-viewer
@@ -115,15 +134,16 @@ Cơ chế cấp DHCP cho các máy ảo sẽ do Router bên ngoài đảm nhận
   - virt-manager: cung cấp giao diện đồ họa để quản lý máy ảo.
   - virt-viewer: hiện thông tin lúc install.
 #### 8.2 Tạo máy ảo đơn giản
+##### virsh
   - $virt-install \
   - $--name=centos7 \	Tên máy ảo
   - $--vcpu=1 \	Lượng cpu ảo cho guest
   - $--memory=1024 \	Lượng ram ảo cho guest(MB)
-  - $--cdrom=/path/to/IOS_file \	Địa chỉ file ios để boot
+  - $--location=/path/to/IOS_file \	Địa chỉ file ios để boot
   - $--disk=/path/to/locate/guest_vm.qcow2,size=5,format=qcow2 \	Địa chỉ để lưu lại image guest-vm;dung lượng disk(GB); kiểu định dạng image
   - $--os-variant=centos7.0 \	Loại OS đang tạo, xem chi tiết bằng lệnh $osinfo-query os
   - $--network bridge=virbr0 \	Loại mạng mà máy ảo sử dụng
-  - &--extra-args='console=ttyS0' hoặc tty0	Dùng để  hiện thông tin máy ảo qua terminal gồm các bước cài đặt và terminal cảu máy ảo.
+  - &--extra-args='console=ttyS0 console=tty0' hoặc tty0	Dùng để  hiện thông tin máy ảo qua terminal gồm các bước cài đặt và terminal của máy ảo.
 #### Đăng nhập máy ảo
   - $virsh console [vm-name]
 ### 9.Sử dụng các công cụ để thao tác với KVM: CLI, Virt-manager, ... Các thao tác chính để tương tác với KVM hay máy ảo trên KVM.
@@ -174,6 +194,9 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
  - Tab Edit: Xem thông số, cài đặt và chỉnh sửa VM network, storage, network interface
  - Tab View: Xem thông số guest.
  - Chuột phải vào VM: dùng để start/pause/resume/delete/migrate/clone VM.
+#### 9.3 qemu
+	qemu là lớp bên dưới của libvirt. Nó cũng cung cấp đầy đủ các chức năng quản lý theo dõi máy ảo. Tuy nhiên khi quản lý với số lượng máy ảo nhiều, và tìm kiếm cú pháp dễ dàng, tự động hóa thì ta nên sử dụng virsh
+	Tuy nhiên có một số tính năng mà chỉ qemu có, VD: Copy on write: các máy ảo khi cài đặt sử dụng mã nguồn chung, chỉ lưu những thay đổi vào image mới
 ### 10.Tìm hiểu sâu các option khi tạo VM (của CPU, Disk, NIC)
 #### 10.1 CPU
  - --vcpus=VCPUS[,maxvcpus=MAX][,sockets=#][,cores=#][,threads=#]	Lựa chọn số vCPU mà guest sẽ dùng. Nếu maxvcpu được chỉ ra, guest có thể hotplug tới MAX vcpu khi guest đang chạy, nhưng ban đầu thì chỉ với VCPU.
@@ -205,13 +228,13 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
   - user	Kết nối tới LAN sử dụng SLIRP. Chỉ sử dụng nếu đang chạy QEMU guest như người dùng không có đặc quyền.
   - Nếu không có thì virt-install chọn default, cấu hình tốn hơn.
  - model	Chỉ định loại thiết bị mạng (e1000,virtio,rtl8139...).
- - mac	Chỉ định địa chỉ MAC, mặc định là ngẫu nhiên, với QEMU hoặc KVM sẽ bắt đầu bới '52:54:00'.
+ - mac	Chỉ định địa chỉ MAC, mặc định là ngẫu nhiên, với QEMU hoặc KVM sẽ bắt đầu với '52:54:00'.
  
 #### 10.4 NIC
  - --serial type,opt1=val1...	Các thiết bị serial kết nối với guest
   - dev,path=HOSTPATH	thiết bị serial, có thể là /dev/ttyS0.
   - file,path=FILENAME	output ra FILENAME
-  - pipe,path=PIPEPATH	Xem man 7 p
+  - pipe,path=PIPEPATH	Xem man 7 pipe 
   - tcp,host=HOST:PORT,mode=MODE,protocol=PROTOCOL	Thiết lập kết nối console tcp
     - HOST mặc định là 127.0.0.1, PORT thì cần thiết.
     - MODE là bind (đợi kết nối) hoặc connect (gửi output qua HOST:PORT)
@@ -219,17 +242,18 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
   - udp,host=HOST:PORT,bind_host=BIND_HOST:BIND_PORT	Thiết lập kết nối console udp
   
 #### 10.5 RAM
- - --numatune=NODESET,[mode=MODE]	Chỉ định node NUMA và mode, xem thêm ở 'man 8 numactl'
+ - --numatune=NODESET,[mode=MODE]	Chỉ định node NUMA và mode, xem thêm ở 'man 8 numactl', 'man 7 numa'
+ NUMA hiểu đơn giản là kiến trúc giúp chia nhỏ RAM và các process truy cập RAM song song, giúp tăng hiệu năng.
 *https://www.admin-magazine.com/Archive/2014/20/Best-practices-for-KVM-on-NUMA-servers để tìm hiểu thêm về NUMA+KVM*
 #### 10.6 Graphic
  - --graphic TYPE,opt1=arg1...	Lựa chọn giao diện có thể kết nối với guest
  - type	Mặc định là vnc. Ngoài ra có thể là sdl (SLD window) hoặc spice.
  - port	Chỉ định port (sử dụng bởi vnc và spice), 5900 trở lên.
- - listen	Chỉ định kết nối lắng nghe cảu VNC/Spice. Mặc định là localhost.
+ - listen	Chỉ định kết nối lắng nghe của VNC/Spice. Mặc định là localhost.
  - password	Chỉ định password khi muốn kết nối
  - passwordvalidto	Chỉ định thời gian hết hạn password, format là YYYY-MM-DDTHH:MM:SS
 #### 10.7 Cài đặt khác
- - --connect=CONNECT	Kết nối tới hipervisor. Có thể là qemu:///system (nếu chạy trên nhân với quyền root) hoajcwqemu:///session (chạy trên nhân với quyền không phải root).
+ - --connect=CONNECT	Kết nối tới hipervisor. Có thể là qemu:///system (nếu chạy trên nhân với quyền root) hoặc qemu:///session (chạy trên nhân với quyền không phải root).
  - --debug Để debug khi cài đặt vm
  - --description	Mô tả về vm.
  - --location=LOCATION	Nguồn để cài đặt image, có thể là một địa chỉ thư mục, một NFS server (nfs://host/path) hoặc http,ftp server
@@ -246,7 +270,7 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
 ##### CLI
 *Xem lại ở 8.2*
 ##### virt-manager
- - Chuột trái vào File -> New Virtual Machine. Tại popup cấu hình, ta lần lượt chọn image và cách boot -> Chọn lượng RAM, CPU -> Chọn storage (tạo mới hoặc sử dụng lại) -> Chọn tên VM  và chọn network (tùy chọn). Sau đó ấn Finish.
+ - Chuột trái vào File -> New Virtual Machine. Tại popup cấu hình, ta lần lượt chọn image và cách boot -> Chọn lượng RAM, CPU -> Chọn storage pool (tạo mới hoặc sử dụng lại) -> Chọn tên VM  và chọn network (tùy chọn). Sau đó ấn Finish.
 #### 11.2 Xóa
 ##### CLI
  - $virsh undefine [domain-name]	Nếu host đang tắt, thì xóa hoàn toàn cấu hình, nếu host đang bật thì chuyển thành domain tạm thời (nếu reboot sẽ mất cấu hình).
@@ -265,18 +289,53 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
   - --live	Áp dụng cho domain đang chạy
   - --current	Áp dụng domain hiện thời
 *Có thể cần phải setmaxmem cao hơn setmem*
-*Không sử dụng thêm/bớt +/- được*
+- $virsh setmaxmem [domain] [size][G,M] [OPTION] Thay đổi max RAM của guest.
+*Không sử dụng thêm/bớt +/- được, setmaxmem cần phải turnoff máy*
 ###### virt-manager
-*Không có*
-##### Storage
-*Phần này chỉ đề cập đến thay đổi dung lượng storage guest, còn đối với pool và volume bàn đến sau*
+ - Tại phần thanh công cụ, chọn show virtual hardware detail, chọn phần RAM -> tăng giảm theo ý muốn.
+ ![image](https://user-images.githubusercontent.com/43545058/96985692-fe1cde00-154a-11eb-995c-4912b07a4b5e.png)
+CPU 
+##### CPU
 ###### CLI
-
-###### virt-manager
+ - $virsh setvcpu [domain] [numm] --enable/disable
+  - --config /live/current [ko dung duoc]
+ - $virsh setvcpus [domain] [count]
+ Khi dùng setmax vcpu chỉ được thực hiện khi guest turn off.
 ##### Driver
+###### CLI
+ - virsh nodedev-list/detach/reattach/reset/dumpxml [name]
+###### virt-manager
+ - Tại phần hardware detail, chọn từng thiết bị một, có phần remove/add hardware/ xem dumpxml
 #### 11.4 Sao lưu
 #### 11.5 Clone
 #### 11.6 Snapshot
+ - Các file xmlsnapshot được lưu ở /var/lib/libvirt/qemu
+ - Khi snapshot theo cách bình thường, guest sẽ vào trạng thái pause, sau khi hoàn thành thì tiếp tục chạy.
+ - raw disk không hỗ trợ snapshot
+##### 1. Tạo bằng qemu-img
+ - $qemu-img snapshot -l [path-to-image]	Hiện tất cả các snapshot
+  - -c [snapshot-name] [path-to-image]	Tạo snapshot mới
+  - -d	Xóa snapshot
+ - Path thường là /var/lib/libvirt/images/, hoặc xem qua virsh dumpxml [domain] 
+###### Raw to qcow2
+ - qemu-img convert -f raw -O qcow2 image.img image.qcow2
+ Chuyển đổi sang các định dạng khác cũng tương tự
+ Chuyển xong cần phải sửa dumpxml file location disk: path và type: raw->qcow2
+##### 2. Tạo với virsh
+ - virsh snapshot-create-as [domain] --name [name] 
+  - --disk-only :Chỉ tạo snapshot disk
+  - --live: Tạo thêm snapshot với ram ( tốn nhiều tài nguyên hơn )
+  - --quience: Chức năng được tạo thêm nếu cài thêm qemu guest agent ở guest, giúp hoàn thành nốt những lệnh trên ram, rồi mới snapshot
+  - --atomic: Kiểm tra snapshot có thành công hay không
+ - virsh snapshot-revert : Chỉ được thực hiện khi guest shutdown
+ - Với live (external)snapshot:
+```
+virsh snapshot-create-as testvm snap1-testvm \
+--diskspec vda,file=/export/vmimgs/testvm-snap-new-name.qcow2 \
+--disk-only --atomic
+```
+  --diskspec địa chỉ file snapshot
+
 ### 12.Phân tích đường đi gói tin với 3 chế độ card mạng, nó đi qua các point nào ? (vẽ layout)
 #### 12.1 Nat mode
 ![image](https://user-images.githubusercontent.com/43545058/89253416-d3f00a00-d646-11ea-89c8-4570b501aa14.png)
