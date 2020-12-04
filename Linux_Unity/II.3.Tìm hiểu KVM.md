@@ -143,7 +143,7 @@ Cơ chế cấp DHCP cho các máy ảo sẽ do Router bên ngoài đảm nhận
   - $--disk=/path/to/locate/guest_vm.qcow2,size=5,format=qcow2 \	Địa chỉ để lưu lại image guest-vm;dung lượng disk(GB); kiểu định dạng image
   - $--os-variant=centos7.0 \	Loại OS đang tạo, xem chi tiết bằng lệnh $osinfo-query os
   - $--network bridge=virbr0 \	Loại mạng mà máy ảo sử dụng
-  - &--extra-args='console=ttyS0 console=tty0' hoặc tty0	Dùng để  hiện thông tin máy ảo qua terminal gồm các bước cài đặt và terminal của máy ảo.
+  - $--extra-args='console=ttyS0 console=tty0' Dùng để  hiện thông tin máy ảo qua terminal gồm các bước cài đặt và terminal của máy ảo.
 #### Đăng nhập máy ảo
   - $virsh console [vm-name]
 ### 9.Sử dụng các công cụ để thao tác với KVM: CLI, Virt-manager, ... Các thao tác chính để tương tác với KVM hay máy ảo trên KVM.
@@ -307,7 +307,24 @@ CPU
 ###### virt-manager
  - Tại phần hardware detail, chọn từng thiết bị một, có phần remove/add hardware/ xem dumpxml
 #### 11.4 Sao lưu
+Làm theo cách thủ công khi muốn sao lưu toàn bộ máy:
+ - copy dumpxml
+  - virsh dumpxml Ubuntu4 > /Mybackup/Ubuntu4.xml
+ - copy qcow2 file
+  - cp /var/lib/libvirt/images/Ubuntu4.qcow2 /Mybackup/Ubuntu4.qcow2
+Khi muốn recovery
+ - undefine VM
+  - virsh undefine Ubuntu4
+ - copy lại qcow2 backup file vào địa chỉ gốc
+ - define lại bằng file xml backup của mình
+  - virsh define –file /Mybackup/Ubuntu4.xml
 #### 11.5 Clone
+```
+# virsh suspend db1
+# virt-clone  --connect qemu:///system  --original   db1   --name   db2   --file   db2.img
+# virsh resume   db1
+```
+ - Có thể chạy đồng thời hai clone cùng lúc (khác địa chỉ MAC)
 #### 11.6 Snapshot
  - Các file xmlsnapshot được lưu ở /var/lib/libvirt/qemu
  - Khi snapshot theo cách bình thường, guest sẽ vào trạng thái pause, sau khi hoàn thành thì tiếp tục chạy.
@@ -335,25 +352,196 @@ virsh snapshot-create-as testvm snap1-testvm \
 --disk-only --atomic
 ```
   --diskspec địa chỉ file snapshot
+#### 11.7 Base qcow image
+ - Copy on write là một kỹ thuật quản lý tài nguyên, cho phép thiết lập một image một lần để có thể sử dụng nhiều lần mà không làm thay đổi chúng. Điều này hữu ích để tạo một môi trường ổn định để từ đó tạo nhiều môi trường khác nhau từ môi trường gốc.
 
+ - Để tạo ra một image dựa trên một image gốc, ổn định, sử dụng qemu-img với tùy chọn "backing_file" để nói cho qemu sử dụng image nào làm để copy. Khi máy ảo sử dụng ổ đĩa mới, nó vẫn có thể truy cập tài nguyên trên base image và mọi thay đổi của nó sẽ được lưu trên image mới.
+ - Tạo disk có backing file
+```
+ qemu-img create -f qcow2 \
+                -o backing_file=/path/to/base/image.qcow2 \ 
+                /path/to/guest/image.qcow2
+```
+ - Rebase lại backing file cho đúng định dạng qcow2
+```
+qemu-img rebase -f qcow2 -F qcow2 /path/to/guest-VM.qcow2 -b /path/to/base-VM.qcow2
+```
+ - Kiểm tra backing file format 
+```
+qemu-img info /path/to/guest.qcow2
+```
+ - Sau đó dùng virt-install tạo guest (Phần trên)
+ - img dùng để install vẫn dùng định dạng raw.
+ - Kiểm tra chuỗi file backing bằng qemu-img info --backing-chain [VM.qcow2]
+*Nếu không nhận disk nhớ check lại own quyền write*
 ### 12.Phân tích đường đi gói tin với 3 chế độ card mạng, nó đi qua các point nào ? (vẽ layout)
 #### 12.1 Nat mode
 ![image](https://user-images.githubusercontent.com/43545058/89253416-d3f00a00-d646-11ea-89c8-4570b501aa14.png)
  - Mạng ảo sử dụng mặc định là mạng NAT. Ở trong mode này, các guest có thể giao tiếp với nhau qua một mạng riêng, và giao tiếp với mạng Internet qua cơ chế NAT tại IP của host
+ ![image](https://user-images.githubusercontent.com/43545058/97951180-e9064180-1dcb-11eb-9fa9-093700497354.png)
+ - Trong mạng ảo có thành phần deamon dnsmasq sẽ được libvirt gọi và chịu trách nhiệm làm server DHCP và DNS cho mạng ảo. Cấu hình file này ở /var/lib/libvirt/dnsmasq/<virtual-network-name>.conf. Mạng mặc định có tên là default.
+ - Ngoài ra libvirt cũng sẽ tự sinh ra rule cho iptables để có thể forward nat thành công.
+ - Thay đổi cấu hình ở virsh net-edit <name>
+ ![image Ví dụ file cấu hình](https://user-images.githubusercontent.com/43545058/97956496-66857e00-1ddb-11eb-87e8-aa32fc4585a7.png)
+
 #### 12.2 Routed mode
 ![image](https://user-images.githubusercontent.com/43545058/89253660-6bedf380-d647-11ea-82a1-1a7df863c458.png)
- - Mạng ảo sử dụng chế độ này có tác dụng tương tự như bridge. Các guest có IP cùng nằm với mạng của host IP bên ngoài. Các guest gửi gói tin qua host, host đóng vai trò như một router, nhận nhiệm vụ chuyển tiếp gói tin.
+ - Tạo một mạng ảo, tuy nhiên không có NAT server và route. Các máy ảo muốn truy cập vào mạng ảo và muốn kết nối ra ngoài phải tự tạo thủ công.
 #### 12.3 Isolated mode
 ![image](https://user-images.githubusercontent.com/43545058/89253983-46adb500-d648-11ea-815a-5cc0497fd275.png)
- - Mạng sử dụng chế độ này được cô lập bởi mạng bên ngoài. Có tác dụng kết nối chỉ trong các guest và host kết nối với mạng ảo
+ - Mạng sử dụng chế độ này được cô lập bởi mạng bên ngoài. Có tác dụng kết nối chỉ trong các guest và host kết nối với mạng ảo.
+#### 12.4 Bridge mode
+ - Các gói tin của máy ảo sẽ được chuyển trực tiếp qua mạng thực, host ở đây đóng vai trò là 1 bridge.
+ - Máy ảo sẽ nhận IP, DNS từ mạng thật bên ngoài, và các máy tính ở bên ngoài có thể nhìn thấy IP của máy ảo.
 ### 13.Làm rõ đường đi gói tin khi sử dụng chế độ NAT. Không cần tạo dải bridge thì máy ảo có ra ngoài được không, nó sẽ đi qua đâu, đâu là thành phần cấp dhcp cho máy ảo.
 ![image](https://user-images.githubusercontent.com/43545058/89254475-61ccf480-d649-11ea-8182-b9b1549ce048.png)
  - Khi sử dụng chế độ NAT, máy guest sẽ được cấp IP động qua một DNS và DHCP server. Server này nằm trong vmSwitch, được libvirt sử dụng trên chương trình dnsmasq.
 ### 14.Kiểm tra switch ảo với card thật có liên quan gì đến nhau
+ - Khi tạo switch ảo bằng brctl, ta có tùy chọn chọn port.
+```
+Sửa và restart lại network
+$ cat /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto br0
+iface br0 inet dhcp
+    bridge_ports    ens33
+    bridge_stp      off
+    bridge_maxwait  0
+    bridge_fd       0
+$ sudo /etc/init.d/networking restart
+```
+ - Khi đó ta đã tạo một switch ảo có chức năng tương tự với switch vật lí tạo thành topo như sau: mạng Internet - NIC vật lý - (SW ảo: NIC ảo nối tới NIC vật lý - NIC máy ảo 1 - NIC máy ảo 2 -...)
+ - Mỗi khi kết nối máy ảo với SW ảo thì SW ảo tạo một NIC ảo tương ứng, hay còn được gọi là thiết bị TAP, kết nối với NIC "ảo" của máy ảo.
+ ![image Sơ đồ trong Switch ảo](https://user-images.githubusercontent.com/43545058/97950417-58c6fd00-1dc9-11eb-89b4-16e8543897ac.png)
 ### 15.Trả lời các câu hỏi máy ảo được lưu ở đâu, mỗi thư mục của máy ảo có các file như thế nào, làm rõ thông tin trong từng file.
+#### Disk
+ - Disk thường được lưu ở /var/lib/libvirt/images/, hoặc cũng có thể kiểm tra bằng virsh domblklist [domain name] để hiện danh sách các file của mỗi VM.
+#### Dumpxml
+ - Các file dumpxml thường được lưu ở /etc/libvirt/qemu, hoặc cũng có thể trích xuất toàn bộ hay một phần bằng virsh dumpxml [domain name]
+#### Logging
+ - File log thường được lưu ở /var/log/libvirt/qemu/<VS>.log, hoặc có thể chỉnh sửa ở file dump.
+```
+Ví dụ cấu hình dump
+<devices>
+    ...
+    <console type=pty>
+       <target type=sclp port=0/>
+       <log file=/var/log/libvirt/qemu/vserv-cons0.log append=on/>
+    </console>
+</devices>
+```
+ - Log_level: Từ mức 4 (chỉ hiển thị lỗi) -> 1 (toàn bộ lỗi, cảnh báo). Thay đổi log_level ở /etc/libvirt/libvirtd.conf, sau đó restart lại deamon systemctl restart libvirtd.service
+
 ### 16.Tìm hiểu về file XML của máy ảo, của network, cách tạo máy ảo, network mới bằng file xml
-### 17.Chỉnh sửa cấu hình máy ảo bằng file XML
+ - Các file dumpxml thường được lưu ở /etc/libvirt/qemu, hoặc cũng có thể trích xuất toàn bộ hay một phần bằng virsh dumpxml [domain name]
+*Chi tiết cấu hình xml xem ở https://libvirt.org/formatdomain.html*
+#### Chỉnh sửa cấu hình chung
+ - virsh edit <domain name>
+ ![image virsh edit](https://user-images.githubusercontent.com/43545058/98316908-e561fd00-200d-11eb-90fd-d866f6fc8f32.png)
+#### Một số thẻ cấu hình xml của máy ảo
+ - <domain type='kvm' id='1> Toàn bộ file xml được gói trong cặp thẻ domain. với 'type' là loại hypervisor để chạy domain này, 'id' để chỉ STT của các guest đang chạy, máy guest không chạy không có id.
+ - <name> Tên máy ảo
+ - <memory unit='KiB'>[number] </memory> Lượng ram dùng cho boot, với đơn vị có thể là b,k,m,g,.... hay bytes,KiB,MiB,... 
+ - <maxMemory > [number] Lượng ram tối đa trong quá trình chạy, nếu không có thẻ này thì mặc định bằng với lượng ram trong <memory>. Thuộc tính đi kèm: unit
+ - <currentMemory unit='k'>[number] Lượng ram thực của guest, mặc định bằng với lượng của <memory>, có thể được tăng lên tối đa bằng <maxMemory>. Thuộc tính đi kèm: unit
+ - <vcpu> Lượng vcpu tối đa 
+ - <os> Lựa chọn cài đặt OS. Trong đó có các thẻ con như
+  - <type> [value] Chỉ định loại OS sẽ được boot, với giá trị là 'hvm' là OS được thiết kế chạy trên bare metal, lựa chọn phổ biến nhất, còn giá trị là 'linux' là OS hỗ trợ Xen 3 hypervisor guest ABI. Thuộc tính đi kèm: arch: kiến trúc cpu được dùng ảo hóa, với giá trị là 'x86_64' hoặc 'i686';
+  - <boot> Thiết bị dùng để boot. Thuộc tính: dev:'fd', 'hd', 'cdrom' hay 'network'. Có thể có nhiều thẻ <boot>, và máy sẽ chọn thẻ <boot> theo thứ tự đầu tiên để tìm boot.
+ - <feature> Gồm nhiều thẻ con có thể tăng hiệu năng đối với các dòng OS khác nhau.
+ - <cpu> Với các thuộc tính dùng để kiểm tra điều kiện cpu khi khởi tạo, khởi động, di chuyển guest
+ - <clock> Đặt thời gian cho guest. Thuộc tính offset dùng để chỉ định thời gian khởi tạo, với giá trị 'utc': đồng bộ thời gian với host, ('localtime' đối với Windows),...
+  - <timer> Dùng để điều chỉnh giờ. Các thuộc tính là 'name' với giá trị tương ứng cho từng loại hypervisor (kvmclock hoặc pit cho qemu), và thuộc tính tickpolicy, guest sẽ xử lý mặt thời gian khi guest thoát khỏi trang thái pause(delay, catchup, discard, merge)
+ - <on_poweroff> / <on_reboot> / <on_crash> Dùng để ghi đè hành động khi gọi API hoặc virsh dùng để yêu cầu reboot/poweroff guest hoặc một hành động bất ngờ xảy ra. Có các giá trị như destroy,restart, preserve...
+ - <divices> Cài đặt cho các device của guest.
+  - <emulator> Chỉ địa chỉ của trình giả lập. VD
+```
+<emulator>/usr/bin/qemu-system-x86_64</emulator>
+```
+  - <disk> Định nghĩa các loại disk như đĩa floppy, harđík, cdrom... . Một số thuộc tính là 'type': quy định loại nguồn ('file','block','dir','network','volume','nvme'); 'device' quy định là nguồn kia sẽ được hiển thị trên guest dưới dạng nào('floppy','disk','cdrom','lun'), mặc định là disk. Thiết bị lun (logical unit number) có thêm một số thuộc tính đi kèm khác.
+    - Với type='file'
+    - <driver> Có các thuộc tính là 'name': ?(thường là qemu); 'type': Định dạng file.
+    - <source> Thuộc tính 'file'= đường dẫn tới file disk
+    - <target> Thuộc tính 'dev'= tên logical device trên guest;'bus' quy định kiểu bus device ('ide','scsi','virtio','usb','sata','sd',...)
+    - <address> Nếu có, gắn disk tới slot controller 
+    
+    - Với type='network'
+    - <driver> Tương tự với 'file'
+    - <source> Nguồn disk từ trên mạng về, với thuộc tính chỉ ra giao thức lấy dữ liệu 'protocol'=(iscsi,nbd,rbd,http,ftp,ftps,tftp,htps,gluster) ; 'name': Chỉ ra volume/image nào được sử dụng đến; 'query'=...
+    ![image Chi tiết một số thuộc tính đi kèm với từng giao thức](https://user-images.githubusercontent.com/43545058/98345691-96d15480-2047-11eb-995d-567c6c7619dd.png)
+        - <host> Thuộc tính 'name' và 'port' ghi tên và port của server
+        - <auth> Thuộc tính 'username' ghi tài khoản
+                - <secret> Thuộc tính 'type':Chỉ ra loại xác thực nào( và 'usage'
+        - <config> Thuộc tính 'file' chỉ đường dẫn config file của client trong mạng lưu trữ.
+    - <target> Tương tự với 'file'
+    - Với type='volume'
+    - <driver> Tương tự với 'file'
+    - <source> Có 'pool': tên pool chỉ tới và 'volume': tên volume sử dụng.
+    - <target> Tương tự với 'file'
+  - <controller> Với thuộc tính 'type' và 'index' biểu thị loại bus sẽ được sử dụng trong guest. Thường thì không phải tự khởi tạo thẻ này, nhưng có thể được tạo riêng khi muốn sử dụng thêm các device hotplug.(tìm hiểu thêm tại https://libvirt.org/pci-hotplug.html)
+  - <interface> Có thuộc tính 'type' quy định kiểu network
+  - Với 'type'='network': Kết nối guest với mạng ảo.
+    - <source> Thuộc tính 'network': Tên của mạng ảo (xem ở virsh net-list) được guest sử dụng và 'portgroup': tên của portgroup được gán cho interface đó.
+    - <mac> Địa chỉ mac
+    - <model> Thuộc tính 'type'='virtio': Kiểu network NIC, thường là virtio để tăng hiệu quả khi kết nối với mạng ảo và hypervisor.
+    - <address> Nếu có,thể hiện kiểu, địa chỉ device
+  - Với 'type'='direct': NIC Guest kết nối trực tiếp với NIC interface cảu host (xem phần cấu hình virtual network)
+    - <source> Thuộc tính 'dev'= tên interface của host
+    - <mac> Nếu có, đặt địa chỉ mac
+    - <boot> 'order'=[number]
+  - Với 'type'='bridge' Guest sẽ kết nối với brigde của host tạo ra nhưng libvirt không quản lý bridge này
+    - <source> 'bridge'= Tên của bridge
+    - <target> 'dev': tên dev trên guest
+  - ...
+  - <graphic> graphic devide giúp tương tác đồ họa với guest. Có thể có một hoặc nhiều graphic với 'type' khác nhau.
+  
+#### Thẻ cấu hình virtual network 
+![image Ví dụ cấu hình một virtual network](https://user-images.githubusercontent.com/43545058/98621146-35f09780-2339-11eb-9d66-326c8bfaff12.png)
+ - Sử dụng virsh net-edit [network name] để sửa cấu hình mạng và các từ khóa khác để thêm/xóa/... mạng. File network được đặt ở /etc/libvirt/qemu/networks/.
+ - <network> Một mạng ảo được gói trong thẻ network, có các thẻ phụ sau:
+  - <name> Tên của network
+  - <uuid> Nếu có, UUID riêng của network, không cần cũng được, chú ý khi chuyển mạng/clone...
+  - <forward> Nếu không có thẻ này, network sẽ thuộc kiểu isolated, nếu thêm thuộc tính mode='nat, network thuộc kiểu NAT, còn với mode='route', network thuộc kiểu routed và không có NAT, với mode='bridge|private|vepa|pasthrough', network sẽ kết nối trực tiếp tới network interface của host hoặc bridge device - direct type (Sử dụng DNS, DHCP không phải của libvirt)
+*https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/virtualization_administration_guide/sect-attch-nic-physdev*
+  - <bridge> thuộc tính 'name': tên của bridge (brctl show), 'stp': giao thức tránh tạo vòng lặp trong mạng ('on','off')
+  - <mac> Thuộc tính 'address': mac của bridge
+  - <ip> Thuộc tính 'address':IP của bridge và 'netmask':A.B.C.D
+    - <dhcp> Cấu hình dhcp nếu có 
+        - <range> 'start' và 'end'='A.B.C.D':range của dhcp
+  - <portgroup> Nếu có, quy định các portgroup kèm các thuộc tính riêng của từng group.
+*Xem thêm tại https://libvirt.org/formatnetwork.html*
+### 17.Cài đặt tự động cấu hình cho guest 
+ - Xem phần "III.3.Cloud-init.md"
 ### 18.Các công nghệ liên quan tới KVM, ví dụ về network (linux bridge OpenvSwitch),  về storage ....
+#### 18.1 OpenvSwitch (OVS)
+##### 1. Giới thiệu
+ - OVS là một phần mềm switch đa lớp, giúp thực hiện là một nền tảng switch tiêu chuẩn quản lý các giao diện, điều khiển, forwarding.
+ - OVS phù hợp với các chức năng như một switch ảo trong môi trường máy ảo. OVS hỗ trợ đa nền tảng công nghệ ảo hóa nhân Linux như Xen, KVM, VirtualBox
+ - Một số tính năng của OVS:
+  - Hỗ trợ 802.1Q VLAN, trunk/access port.
+  - Gộp NIC bằng LACP hoặc giao thức khác.
+  - NetFlow, sFlow(R) dùng để phân tích lưu lượng mạng.
+  - Cấu hình QoS, đặt chính sách (policy).
+  - Tunnel VXLAN, STT, LISP, GRE, Geneve.
+  - QUản lý kết nối với 802.1ag.
+  - OpenFlow để quản lý switch.
+  - Forwarding với hiệu suất cao. 
+###### Một số bộ phận của OVS
+  - ovs-vswitchd : deamon đi kèm switch.
+  - ovsdb-server : database server mà ovs-vswitchd truy vấn để lấy cấu hình.
+  - ovs-dpctl : Tool để cấu hình switch kernel module.
+  - ovs-vsctl : Một tiện ích để truy vấn và cập nhật cấu hình trên ovs-vswitchd.
+  - ovs-appctl : Tiện tích gửi lệnh tới deamon.
+ - Một số tool khác như:
+  - ovs-ofctl : dùng để truy vấn và quản lý switch và controller OpenFlow.
+  - ovs-pki : Dùng để tạo, quản lý cơ hở hạ tầng public-key của OpenFlow switch.
+  - ovs-testcontroler : controller OpenFlow dùng để test.
+  - Một patch giúp tcpdump phân tích gói tin OpenFlow.
+##### 2. Cài đặt
+##### 3. KVM với OVS
+#### 18.2
 ### 19.Tìm hiểu virsh client, các option thông dụng của virsh command
 ### 20.Kĩ thuật migrate VM, cách restore lại một VM trong trường hợp máy ảo bị chết.
 ### 21.Tạo và cấp dhcp từ hypervisor cho guest
