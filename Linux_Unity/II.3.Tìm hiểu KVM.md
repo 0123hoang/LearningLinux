@@ -516,31 +516,7 @@ Ví dụ cấu hình dump
  - Xem phần "III.3.Cloud-init.md"
 ### 18.Các công nghệ liên quan tới KVM, ví dụ về network (linux bridge OpenvSwitch),  về storage ....
 #### 18.1 OpenvSwitch (OVS)
-##### 1. Giới thiệu
- - OVS là một phần mềm switch đa lớp, giúp thực hiện là một nền tảng switch tiêu chuẩn quản lý các giao diện, điều khiển, forwarding.
- - OVS phù hợp với các chức năng như một switch ảo trong môi trường máy ảo. OVS hỗ trợ đa nền tảng công nghệ ảo hóa nhân Linux như Xen, KVM, VirtualBox
- - Một số tính năng của OVS:
-  - Hỗ trợ 802.1Q VLAN, trunk/access port.
-  - Gộp NIC bằng LACP hoặc giao thức khác.
-  - NetFlow, sFlow(R) dùng để phân tích lưu lượng mạng.
-  - Cấu hình QoS, đặt chính sách (policy).
-  - Tunnel VXLAN, STT, LISP, GRE, Geneve.
-  - QUản lý kết nối với 802.1ag.
-  - OpenFlow để quản lý switch.
-  - Forwarding với hiệu suất cao. 
-###### Một số bộ phận của OVS
-  - ovs-vswitchd : deamon đi kèm switch.
-  - ovsdb-server : database server mà ovs-vswitchd truy vấn để lấy cấu hình.
-  - ovs-dpctl : Tool để cấu hình switch kernel module.
-  - ovs-vsctl : Một tiện ích để truy vấn và cập nhật cấu hình trên ovs-vswitchd.
-  - ovs-appctl : Tiện tích gửi lệnh tới deamon.
- - Một số tool khác như:
-  - ovs-ofctl : dùng để truy vấn và quản lý switch và controller OpenFlow.
-  - ovs-pki : Dùng để tạo, quản lý cơ hở hạ tầng public-key của OpenFlow switch.
-  - ovs-testcontroler : controller OpenFlow dùng để test.
-  - Một patch giúp tcpdump phân tích gói tin OpenFlow.
-##### 2. Cài đặt
-##### 3. KVM với OVS
+ - Xem phần "IV.4.OpenvSwitch(OVS)
 #### 18.2
 ### 19.Tìm hiểu virsh client, các option thông dụng của virsh command
 ### 20.Kĩ thuật migrate VM, cách restore lại một VM trong trường hợp máy ảo bị chết.
