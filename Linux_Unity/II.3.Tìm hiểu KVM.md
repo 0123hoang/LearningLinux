@@ -142,7 +142,7 @@ Cơ chế cấp DHCP cho các máy ảo sẽ do Router bên ngoài đảm nhận
   - $--location=/path/to/IOS_file \	Địa chỉ file ios để boot
   - $--disk=/path/to/locate/guest_vm.qcow2,size=5,format=qcow2 \	Địa chỉ để lưu lại image guest-vm;dung lượng disk(GB); kiểu định dạng image
   - $--os-variant=centos7.0 \	Loại OS đang tạo, xem chi tiết bằng lệnh $osinfo-query os
-  - $--network bridge=virbr0 \	Loại mạng mà máy ảo sử dụng
+  - $--network bridge=virbr0 \	Tên mạng mà máy ảo sử dụng
   - $--extra-args='console=ttyS0 console=tty0' Dùng để  hiện thông tin máy ảo qua terminal gồm các bước cài đặt và terminal của máy ảo.
 #### Đăng nhập máy ảo
   - $virsh console [vm-name]
@@ -516,8 +516,9 @@ Ví dụ cấu hình dump
  - Xem phần "III.3.Cloud-init.md"
 ### 18.Các công nghệ liên quan tới KVM, ví dụ về network (linux bridge OpenvSwitch),  về storage ....
 #### 18.1 OpenvSwitch (OVS)
- - Xem phần "IV.4.OpenvSwitch(OVS)
-#### 18.2
+ - Xem phần "IV.3.OpenvSwitch(OVS)
+#### 18.2 OpenFlow
+ - Xem phần "VI.3.OpenFlow"
 ### 19.Tìm hiểu virsh client, các option thông dụng của virsh command
 ### 20.Kĩ thuật migrate VM, cách restore lại một VM trong trường hợp máy ảo bị chết.
 ### 21.Tạo và cấp dhcp từ hypervisor cho guest

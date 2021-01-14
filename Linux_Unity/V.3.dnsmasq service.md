@@ -22,8 +22,10 @@
   - bind-interfaces
  - Thêm dải DHCP
   - dhcp-range=[ip-start],[ip-end],[net-mask],[lease-time]
- - Chỉ cấp với tag trùng nhau
+ - Chỉ cấp với tag vlan trùng nhau
   - dhcp-range=tag:[tag-name],[ip-start],[ip-end],[net-mask],[lease-time]
+ - Chỉ cấp với interface cụ thể 
+  - dhcp-range=[interface-name],[ip-start],[ip-end],[net-mask]
  - Dải static không dùng DHCP
   - dhcp-range=[ip],static
  - Đặt ip host và host-name cụ thể theo MAC
@@ -37,7 +39,13 @@
   - log-facility=/var/log/dnsmasq.log
 *Nếu dnsmasq xung đột với systemd-resolved: bind-interfaces để khác cặp ip:port là được* 
  - restart lai dnsmasq
-### 3.2 Test systax conf file
+### Một số cấu hình khác
+ - dns-option=option:[option],[.....]
+  - :netmask,[MASK]
+  - :router,[IP] Thêm default route
+  - :dns-server,[IPs] Thêm dns server
+  - :ntp-server,[IP]	(Có thể thay 'ntp-server'=42)
+### 3.3 Test systax conf file
  - dnsmasq --test
-### 3.3 Lease file location
+### 3.4 Lease file location
  - /var/lib/misc/dnsmasq
