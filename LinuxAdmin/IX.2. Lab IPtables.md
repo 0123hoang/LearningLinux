@@ -48,6 +48,7 @@
  - Cho chuyển tiếp gói tin	iptables -A FORWARD -i ens37 -j ACCEPT
  ![image](https://user-images.githubusercontent.com/43545058/87026810-78c52600-c206-11ea-96c1-32cfe88fd01c.png)
  ![image PC2 thông qua PC1 ping tới một máy trạm ngẫu nhiên trên mạng ct](https://user-images.githubusercontent.com/43545058/87026863-8c708c80-c206-11ea-9fa7-b91846cb6581.png)
+*Nếu không được thì kiểm tra lại ip route đi*
 ### 3. Server DC có thể liên hệ với PC 1 trên cổng 22 thông qua địa chỉ IP Public của Server nội bộ.
 *Thay bằng ssh bằng ping*
  - Từ 1 máy trạm nội bộ ping tới PC1(thay bằng PC2)

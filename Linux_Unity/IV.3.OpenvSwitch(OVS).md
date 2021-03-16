@@ -31,7 +31,7 @@ sudo apt install openvswitch-switch
  - Sau đó khởi động deamon
   - sudo ovs-vswitchd
  - Kiểm tra
-  - systemctl status ovs-switchd.service
+  - systemctl status ovs-vswitchd.service
 ## 3. Cấu hình ovs-vsctl
 ### Tạo bridge mới
   - ovs-vsctl add-br [BRIDGE]

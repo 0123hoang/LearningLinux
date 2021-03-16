@@ -195,7 +195,7 @@ virt-install --name ctest1 \
   --network network:default
 ```
 *Mặc định thì user login sẽ bị block nếu không có cấu hình 'lock_passwd: false'; root user không có mật khẩu và bị khóa nếu không có cấu hình 'disable_root: false'; ssh phải được sử dụng mật khẩu nếu có 'ssh_pwauth: true'*
-
+*Bắt buộc phải có meta-data file ( để trống cũng được )
 ### 8.2 Sử dụng geniosimg/mkisofs để tạo seed
  - Với genisoimage
 ```

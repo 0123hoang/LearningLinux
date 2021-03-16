@@ -26,7 +26,7 @@
 *Xem chi tiết ở phần VII.3.OpenFlow.md*
 ## 5 NETCONF, RESTCONF (protocol)
  - REST API: Một API dựa trên kết nối HTTP, giúp giao tiếp với web server bằng các câu lệnh như GET,POST,PUT,DELETE.
- - NETCONF: Để giao tiếp với các thiết bị mạng (không thể giao tiếp trên kết nối HTTP được), NETCONF được sinh ra để làm nhiệm vụ này. NETCONF thực hiện dựa trên kết nối SSH qua TCP cổng 830 (mặc định), qua các câu lệnh như get,get-config,edit-config,copy-config,delete-config. NETCONF sử dụng XML để mã hóa dữ liệu, sử dụng YANG là một ngôn ngữ cấu trúc dữ liệu làm khung định nghĩa dữ liệu.
+ - NETCONF: Để giao tiếp với các thiết bị mạng (các thiết bị không thể giao tiếp trên kết nối HTTP được), NETCONF được sinh ra để làm nhiệm vụ này. NETCONF thực hiện dựa trên kết nối SSH qua TCP cổng 830 (mặc định), qua các câu lệnh như get,get-config,edit-config,copy-config,delete-config. NETCONF sử dụng XML để mã hóa dữ liệu, sử dụng YANG là một ngôn ngữ cấu trúc dữ liệu làm khung định nghĩa dữ liệu.
  - RESTCONF: Ý tưởng và sử dụng như NETCONF nhưng thực hiện trên HTTP. RESTCONF hỗ trợ XML và JSON để mã hóa.
  - Một số so sánh NETCONF và RESTCONF
 |Tính chất| NETCONF| RESTCONF|
@@ -62,7 +62,6 @@
 #### OF-CONFIG (Protocol)
  - Đây là một giao thức để quản lý và cấu hình các OpenvSwitch dựa trên cấu trúc, giao thức của NETCONF.
 ![image Kiến trúc OF-CONFIG tích hợp vào OVSDB server](https://user-images.githubusercontent.com/43545058/103853216-21820e80-50e0-11eb-8918-c850486d92f7.png)
- - Theo mô hình, OF-CONFIG sẽ giúp chuyển các cấu hình từ NETCONF về câu lệnh ovsdb, từ đó tác dụng lên ovsdb server.
  - Với ý tưởng thống nhất sự quản lý về NETCONF, OF-CONFIG có thể được xem là một hướng phát triển tốt. Tuy nhiên, nó chưa thực sự hoàn chỉnh (https://sci-hub.se/https://ieeexplore.ieee.org/document/7502920), và phiên  bản gần nhất trên website github của họ cũng không hoạt động,chỉ dừng ở phiên bản 1.12. (https://github.com/openvswitch/of-config)
  - => Sẽ sử dụng giao thức ovsdb khi giao tiếp với OVS.
 ### 5.2 Cài đặt cơ bản
@@ -72,7 +71,7 @@
  - cd 
  - ./bin/karaf
  - Sau khi đăng nhập, thêm các feature :
-  - >feature:install odl-restconf odl-l2switch-switch odl-mdsal-apidocs odl-dlux-core odl-dluxapps-nodes odl-dluxapps-topology odl-dluxapps-yangui odl-dluxapps-yangvisualizer odl-dluxapps-yangman
+  - >feature:install odl-restconf odl-restconf-all odl-l2switch-switch odl-dlux-core odl-dluxapps-nodes odl-dluxapps-topology odl-dluxapps-yangui odl-dluxapps-yangvisualizer odl-dluxapps-yangman
 ### 5.3 Thêm gói feature phụ (repo)
  - Tại folder của ODL, tạo file "etc/org.ops4j.pax.url.mvn.repositories". Đây là file chứa các URL, ngăn cách với nhau bởi dấu phẩy, là địa chỉ các repo có chứa các feature đang cần thêm.
   - VD về 1 repo có feature odl-mdsal-apidocs: https://repo1.maven.org/maven2/org/opendaylight/netconf/odl-mdsal-apidocs/1.7.4/
@@ -95,78 +94,7 @@ authEnabled=false
 ```
 
 ## 6 Mininet
- - Mininet là một công cụ giả lập hệ thống mạng ảo, cùng với các phần mềm khác như GNS3, packet tracer,...
- - Mininet có ưu điểm là thao tác nhanh chóng, gọn nhẹ, dễ dàng tạo mới.
-### 6.1 Cài đặt
-```
-git clone git://github.com/mininet/mininet
-cd mininet
-mininet/util/install.sh -a
-```
-  - Tải từ package
-```
-sudo apt-get install mininet
-```
-### 6.2 Câu lệnh
- - mn [options]
-  - --help 
-  - --nat Thêm cấu hình NAT cho topo
-  - --mac Tự động thêm MAC cho host
-  - -x/--xterm Thêm xterm (1 kiểu terminal) cho mỗi host)
-  - -i/--ipbase [IPBASE] Đặt dải IP cho host
-  - --topo=[TOPO] Đặt cấu hình topo cho mạng:
-    - minimal: 1 SW và 2 host
-    - linear,[num]: các SW nối tuyến tính với nhau, mỗi SW 1 host
-    - single,[num]: 1 SW nối với các host
-    - tree,[level][,leaf] : số lượng các lớp của cây, mỗi cây có số [leaf] host
-  - --controller=...: Đặt controller
-    - remote,ip=[IP]:[PORT]
-    - ovsc.... OVScontroller
-    - ryu..... Ryucontroller
- - mininet> ấn Tab để hiện thông tin các câu lệnh 
-  - net : Hiển thị các kết nối+ port
-  - links : Trạng thái kết nối
-  - link [node1] [node2] up/down: 
-  - switch [SW] up/down:
-  - dump : Thông tin chung cấu hình mn
-  - sh [command]: Dùng shell để chạy lệnh
-    - sh [OVS-command]: Sử dụng các lệnh của OVS trên mininet
- - Các tùy chọn nâng cao khác:
-  - Sử dụng script để tạo topo, để thực thi khi chạy topo.
-  - Sử dụng câu lệnh để phân tích mạng, gói tin.
-### 6.3 Tạo topo,script với Miniedit
- - Miniedit là 1 .py có trong example folder của mininet (sudo /usr/share/doc/mininet/examples/miniedit.py) giúp tạo topo tự động .
-![image Giao diện miniedit](https://user-images.githubusercontent.com/43545058/104394284-e3ba3580-5578-11eb-8757-5609ff207a25.png)
- - Tạo topo đơn giản với host, sw, controller
-  - Chuột phải vào từng thành phần để cấu hình nếu cần (để mặc định cũng được) (Nếu có controller thì có thể chuyển controller type là remote)
-  - (Tùy chọn) Chọn Run xem có bị lỗi gì không, tại Tab Run->Show OVS summary để kiểm tra.
-  - Chọn File->export level 2 script để xuất ra .py file  
-![image](https://user-images.githubusercontent.com/43545058/104395596-a0ad9180-557b-11eb-912f-6ed39e21b450.png)
-  - Chạy topo với lệnh $sudo python [file-name].py
-###  6.4 Sửa file script 
- - Nếu chỉ tạo topo cơ bản với host,sw và controller như trên thì chưa đủ mô hình, nếu thêm router vào thì cần chỉnh sửa script để thêm ip và ip route.
-  - Tạo topo như hình, với controller thì đổi thành remote, sau đó export ra .py file (file mininet_topo.py)
-#### Mở và sửa file mininet_topo.py:
- - Trước dòng net.build(): Sửa các thành phần sau
-  - Sửa lại các host sao cho khác mạng nhau (ip/subnet) cho phù hợp.
-  - Trên các dòng net.addLink, sắp xếp lại thứ tự kết nối sao cho tuyến tính, tuần tự với nhau (dòng trước có liên quan đến dòng sau, không chỉnh nếu lỗi tự chịu)
- - Sau dòng net.build(): Thêm các thành phần sau
-```
-#Cho phép ip forward qua các port
-r3.cmd("echo 1 > /proc/sys/net/ipv4/ip_forward") 
-#Thêm ip cho port
-r3.cmd("ip addr add 10.0.2.1/24 dev r3-eth1")
-r3.cmd("ip addr add 10.0.1.1/24 dev r3-eth0")
-#Thêm route cho router
-r3.cmd("ip route add 10.0.2.0/24 via dev r3-eth1")
-r3.cmd("ip route add 10.0.1.0/24 via dev r3-eth0")
-#Thêm ip route cho router (Mạng nhỏ này thì chưa cần)
-#Thêm ip route cho host
-    h1.cmd("ip route add default via 10.0.1.1")
-    h2.cmd("ip route add default via 10.0.1.1")
-    h3.cmd("ip route add default via 10.0.2.1")
-```
-![image](https://user-images.githubusercontent.com/43545058/104406146-30aa0600-5591-11eb-90f6-b16c3488c0ad.png)
+( Xem phần IX. Mininet.md )
 ## 7 Opendaylight và Mininet
  - ODL sẽ kết nối qua cổng 6633,6653 hoặc 6640
  - Để kết nối với Mininet với SDN Opendaylight, khi chạy lệnh mn, ta thêm tùy chọn --controller=remote,ip=[IP]:[6633]. Sau đó pingall để ODL nhận diện được hết các node.
@@ -176,23 +104,6 @@ r3.cmd("ip route add 10.0.1.0/24 via dev r3-eth0")
  ovs-vsctl set-controller [BRIDGE] tcp:[IP]:6633
 ```
   - Với port 6633 là mặc định để kêt nối với ODL, IP là địa chỉ ODL, giao thức có thể là tcp,udp hoặc ssl...
-## Tạo lab SDN over VPN on VM
-### Mục tiêu
- - Test xem kết hợp SDN trên đường truyền VPN trên các máy ảo riêng biệt từng đôi một đặt tại các vị trí khác nhau.
-### Ứng dụng tham gia
- - Mininet: Ứng dụng để tạo mạng ảo cho nhanh
- - Opendaylight: SDN để giám sát thiết bị mạng
- - kvm+qemu: Ứng dụng tạo máy ảo
- - OVS: Ứng dụng tạo SW ảo
- - OpenVPN: Ứng dụng tạo VPN server.
-### Mô hình mô phỏng 
-![image](https://user-images.githubusercontent.com/43545058/104439400-a4650680-55c3-11eb-8699-577c03bb359e.png)
- - PC1 và PC3 cùng tunnel, có thể kết nối được với nhau.
- - PC2 không kết nối được với PC1 và 3
 
-
-
-
-## Calico
  
 

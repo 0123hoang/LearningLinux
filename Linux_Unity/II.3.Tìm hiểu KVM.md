@@ -134,7 +134,7 @@ Cơ chế cấp DHCP cho các máy ảo sẽ do Router bên ngoài đảm nhận
   - virt-manager: cung cấp giao diện đồ họa để quản lý máy ảo.
   - virt-viewer: hiện thông tin lúc install.
 #### 8.2 Tạo máy ảo đơn giản
-##### virsh
+##### virt-install
   - $virt-install \
   - $--name=centos7 \	Tên máy ảo
   - $--vcpu=1 \	Lượng cpu ảo cho guest
@@ -144,7 +144,7 @@ Cơ chế cấp DHCP cho các máy ảo sẽ do Router bên ngoài đảm nhận
   - $--os-variant=centos7.0 \	Loại OS đang tạo, xem chi tiết bằng lệnh $osinfo-query os
   - $--network bridge=virbr0 \	Tên mạng mà máy ảo sử dụng
   - $--extra-args='console=ttyS0 console=tty0' Dùng để  hiện thông tin máy ảo qua terminal gồm các bước cài đặt và terminal của máy ảo.
-#### Đăng nhập máy ảo
+##### Đăng nhập máy ảo
   - $virsh console [vm-name]
 ### 9.Sử dụng các công cụ để thao tác với KVM: CLI, Virt-manager, ... Các thao tác chính để tương tác với KVM hay máy ảo trên KVM.
 #### 9.1 CLI
@@ -265,6 +265,7 @@ Chúng ta sẽ sử dụng lệnh $virsh để quản lý máy ảo ($virsh --he
  - --os-type=OS-TYPE	Đặt thuộc tính này để cấu hình HĐH cho guest tốt hơn. Xem ở '--os-variant os'
  - --boot BOOTOPTS	Lựa chọn cấu hình riêng khi boot guest sau khi cài đặt.
 *https://linux.die.net/man/1/virt-install*
+*Xem tùy chọn chi tiết hơn với câu lệnh $virt-install --[device/network...]=?*
 ### 11.Các tính năng của KVM đối với máy ảo: Tạo - xóa - sửa, sao lưu, clone, snapshot... Lab kiểm chứng các tính năng, ví dụ snapshot trên máy ảo qcow2.
 #### 11.1 Tạo máy ảo
 ##### CLI
